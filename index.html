@@ -1,759 +1,1369 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Smart Flood Monitoring</title>
+<title>Smart Flood Monitoring</title>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, "Noto Sans Thai", sans-serif;
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,"Noto Sans Thai",sans-serif;
+}
+
+body{
+    background:
+        radial-gradient(circle at top right,#123b59 0,#07111f 35%),
+        #07111f;
+    color:#fff;
+    min-height:100vh;
+}
+
+/* HEADER */
+
+header{
+    padding:25px 35px;
+    background:rgba(7,17,31,.85);
+    backdrop-filter:blur(15px);
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.logo-icon{
+    width:55px;
+    height:55px;
+    border-radius:16px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:30px;
+
+    background:linear-gradient(135deg,#00c6ff,#0072ff);
+    box-shadow:0 0 30px rgba(0,170,255,.3);
+}
+
+.logo h1{
+    font-size:24px;
+    letter-spacing:1px;
+}
+
+.logo p{
+    color:#7f9bb3;
+    margin-top:5px;
+    font-size:13px;
+}
+
+.live{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px 17px;
+    border-radius:30px;
+
+    color:#4dffae;
+    background:rgba(77,255,174,.08);
+    border:1px solid rgba(77,255,174,.25);
+
+    font-weight:bold;
+}
+
+.live-dot{
+    width:9px;
+    height:9px;
+    background:#4dffae;
+    border-radius:50%;
+    box-shadow:0 0 12px #4dffae;
+}
+
+/* MAIN */
+
+main{
+    max-width:1450px;
+    margin:auto;
+    padding:28px;
+}
+
+/* STATUS */
+
+.status{
+    padding:25px;
+    margin-bottom:22px;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(18,54,81,.9),
+            rgba(9,29,48,.9)
+        );
+
+    border:1px solid rgba(255,255,255,.08);
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:20px;
+    flex-wrap:wrap;
+
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+}
+
+.status-label{
+    color:#7e9ab0;
+    font-size:13px;
+    margin-bottom:7px;
+}
+
+#status{
+    font-size:30px;
+    font-weight:bold;
+}
+
+.normal{
+    color:#43e59a;
+}
+
+.warning{
+    color:#ffd166;
+}
+
+.danger{
+    color:#ff9f43;
+}
+
+.critical{
+    color:#ff5757;
+}
+
+.update{
+    color:#7892a8;
+    font-size:13px;
+}
+
+/* FORECAST */
+
+.forecast{
+    margin-bottom:25px;
+
+    padding:25px;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(13,39,62,.95),
+            rgba(9,25,42,.95)
+        );
+
+    border:1px solid rgba(255,255,255,.08);
+
+    box-shadow:0 15px 45px rgba(0,0,0,.2);
+}
+
+.forecast-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.forecast-title{
+    font-size:19px;
+    font-weight:bold;
+}
+
+.forecast-location{
+    color:#7895aa;
+    font-size:12px;
+}
+
+.forecast-main{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:20px;
+}
+
+.rain-prediction{
+
+    padding:25px;
+
+    border-radius:18px;
+
+    background:rgba(0,0,0,.18);
+
+    border:1px solid rgba(255,255,255,.05);
+}
+
+.rain-icon{
+    font-size:42px;
+}
+
+.rain-result{
+    font-size:25px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.rain-detail{
+    color:#8ca7bb;
+    margin-top:8px;
+    font-size:13px;
+}
+
+.forecast-grid{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:10px;
+}
+
+.hour{
+    padding:15px 8px;
+
+    text-align:center;
+
+    border-radius:14px;
+
+    background:#0a1b2c;
+
+    border:1px solid rgba(255,255,255,.05);
+}
+
+.hour-time{
+    font-size:11px;
+    color:#7792a8;
+}
+
+.hour-icon{
+    font-size:25px;
+    margin:10px 0;
+}
+
+.hour-rain{
+    font-weight:bold;
+}
+
+.hour-prob{
+    font-size:11px;
+    color:#7e9bb0;
+    margin-top:4px;
+}
+
+/* CARDS */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.card{
+    position:relative;
+
+    padding:23px;
+
+    border-radius:20px;
+
+    background:rgba(13,30,47,.92);
+
+    border:1px solid rgba(255,255,255,.07);
+
+    overflow:hidden;
+
+    transition:.25s;
+
+    box-shadow:0 10px 35px rgba(0,0,0,.18);
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:rgba(0,190,255,.3);
+}
+
+.card-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    color:#8ca5ba;
+    font-size:14px;
+}
+
+.card-icon{
+    font-size:27px;
+}
+
+.value{
+    margin-top:17px;
+
+    font-size:35px;
+    font-weight:bold;
+}
+
+.unit{
+    font-size:14px;
+    color:#7891a5;
+    font-weight:normal;
+}
+
+.description{
+    margin-top:7px;
+
+    color:#617b91;
+    font-size:12px;
+}
+
+/* WATER */
+
+.water-card{
+    grid-column:span 3;
+}
+
+.water-bar{
+    height:12px;
+    margin-top:20px;
+
+    background:#142b40;
+
+    border-radius:20px;
+
+    overflow:hidden;
+}
+
+#waterProgress{
+    height:100%;
+    width:0%;
+
+    border-radius:20px;
+
+    background:linear-gradient(
+        90deg,
+        #00d4ff,
+        #006eff
+    );
+
+    transition:.5s;
+}
+
+/* CHART */
+
+.chart-box{
+
+    padding:25px;
+
+    border-radius:22px;
+
+    background:#0c1d2e;
+
+    border:1px solid rgba(255,255,255,.07);
+
+    margin-bottom:25px;
+}
+
+.chart-title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.chart-container{
+    height:330px;
+}
+
+/* FOOTER */
+
+footer{
+    text-align:center;
+
+    padding:25px;
+
+    color:#587084;
+
+    font-size:12px;
+}
+
+/* MOBILE */
+
+@media(max-width:950px){
+
+    .forecast-main{
+        grid-template-columns:1fr;
     }
 
-    body {
-      background: #07111f;
-      color: #ffffff;
-      min-height: 100vh;
+    .cards{
+        grid-template-columns:repeat(2,1fr);
     }
 
-    /* Header */
-    header {
-      background: linear-gradient(135deg, #0b1d33, #0b3554);
-      padding: 22px 30px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
+    .water-card{
+        grid-column:span 2;
     }
 
-    .title {
-      display: flex;
-      align-items: center;
-      gap: 15px;
+    .forecast-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:600px){
+
+    header{
+        padding:18px;
     }
 
-    .title-icon {
-      font-size: 42px;
+    main{
+        padding:15px;
     }
 
-    .title h1 {
-      font-size: 25px;
-      letter-spacing: 1px;
+    .cards{
+        grid-template-columns:1fr;
     }
 
-    .title p {
-      color: #9fb6cc;
-      margin-top: 5px;
-      font-size: 14px;
+    .water-card{
+        grid-column:span 1;
     }
 
-    .live {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(0, 255, 150, 0.1);
-      border: 1px solid rgba(0,255,150,0.3);
-      padding: 10px 15px;
-      border-radius: 30px;
-      color: #50f5a4;
-      font-weight: bold;
+    .forecast-grid{
+        grid-template-columns:repeat(2,1fr);
     }
 
-    .live-dot {
-      width: 10px;
-      height: 10px;
-      background: #50f5a4;
-      border-radius: 50%;
-      box-shadow: 0 0 12px #50f5a4;
+    .logo h1{
+        font-size:18px;
     }
 
-    /* Main */
-    main {
-      max-width: 1400px;
-      margin: auto;
-      padding: 25px;
+    #status{
+        font-size:24px;
     }
+}
 
-    /* Status */
-    .status-box {
-      background: linear-gradient(135deg, #102a42, #0d2236);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.2);
-    }
-
-    .status-title {
-      color: #9fb6cc;
-      font-size: 14px;
-      margin-bottom: 7px;
-    }
-
-    #status {
-      font-size: 25px;
-      font-weight: bold;
-    }
-
-    .status-normal {
-      color: #42e695;
-    }
-
-    .status-warning {
-      color: #ffd166;
-    }
-
-    .status-danger {
-      color: #ff9f43;
-    }
-
-    .status-critical {
-      color: #ff5252;
-    }
-
-    #lastUpdate {
-      color: #8ca4ba;
-      font-size: 13px;
-    }
-
-    /* Cards */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-bottom: 25px;
-    }
-
-    .card {
-      background: #0d1d2e;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 18px;
-      padding: 22px;
-      position: relative;
-      overflow: hidden;
-      transition: 0.25s;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(80,190,255,0.35);
-    }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      right: -35px;
-      top: -35px;
-      background: rgba(0,180,255,0.08);
-      border-radius: 50%;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #9fb6cc;
-      font-size: 14px;
-    }
-
-    .card-icon {
-      font-size: 28px;
-    }
-
-    .value {
-      margin-top: 18px;
-      font-size: 34px;
-      font-weight: bold;
-    }
-
-    .unit {
-      font-size: 15px;
-      color: #8da5ba;
-      margin-left: 5px;
-      font-weight: normal;
-    }
-
-    .card-description {
-      color: #6f879c;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
-    /* Water Level */
-    .water-card {
-      grid-column: span 3;
-    }
-
-    .water-bar {
-      margin-top: 18px;
-      width: 100%;
-      height: 14px;
-      background: #152b40;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-
-    #waterProgress {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #21d4fd, #2152ff);
-      border-radius: 20px;
-      transition: width 0.5s;
-    }
-
-    /* Chart */
-    .chart-box {
-      background: #0d1d2e;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 18px;
-      padding: 25px;
-      margin-bottom: 25px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-    }
-
-    .chart-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .chart-container {
-      height: 320px;
-    }
-
-    /* Footer */
-    footer {
-      text-align: center;
-      color: #60778c;
-      padding: 20px;
-      font-size: 12px;
-    }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .cards {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .water-card {
-        grid-column: span 2;
-      }
-    }
-
-    @media (max-width: 600px) {
-      header {
-        padding: 18px;
-      }
-
-      main {
-        padding: 15px;
-      }
-
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      .water-card {
-        grid-column: span 1;
-      }
-
-      .title h1 {
-        font-size: 19px;
-      }
-
-      .title-icon {
-        font-size: 32px;
-      }
-
-      .value {
-        font-size: 30px;
-      }
-    }
-  </style>
+</style>
 </head>
 
 <body>
 
 <header>
-  <div class="title">
-    <div class="title-icon">🌊</div>
-    <div>
-      <h1>SMART FLOOD MONITORING</h1>
-      <p>ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ</p>
-    </div>
-  </div>
 
-  <div class="live">
-    <div class="live-dot"></div>
-    LIVE
-  </div>
+    <div class="logo">
+
+        <div class="logo-icon">
+            🌊
+        </div>
+
+        <div>
+
+            <h1>SMART FLOOD MONITORING</h1>
+
+            <p>
+                ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="live">
+
+        <span class="live-dot"></span>
+
+        LIVE
+
+    </div>
+
 </header>
+
 
 <main>
 
-  <!-- Status -->
-  <section class="status-box">
+
+<!-- STATUS -->
+
+<section class="status">
+
     <div>
-      <div class="status-title">สถานะระดับน้ำปัจจุบัน</div>
-      <div id="status" class="status-normal">กำลังโหลด...</div>
+
+        <div class="status-label">
+            สถานะระดับน้ำ
+        </div>
+
+        <div id="status">
+            กำลังโหลด...
+        </div>
+
     </div>
 
-    <div id="lastUpdate">
-      Last Update: -
+    <div class="update">
+
+        Last Update:
+        <span id="lastUpdate">-</span>
+
     </div>
-  </section>
 
-  <!-- Sensor Cards -->
-  <section class="cards">
+</section>
 
-    <!-- Water Level -->
+
+
+<!-- RAIN FORECAST -->
+
+<section class="forecast">
+
+    <div class="forecast-header">
+
+        <div class="forecast-title">
+            🌧️ คาดการณ์ฝนล่วงหน้า
+        </div>
+
+        <div class="forecast-location">
+            Phuket
+        </div>
+
+    </div>
+
+
+    <div class="forecast-main">
+
+
+        <div class="rain-prediction">
+
+            <div class="rain-icon" id="rainIcon">
+                🌦️
+            </div>
+
+            <div class="rain-result" id="rainResult">
+                กำลังตรวจสอบ...
+            </div>
+
+            <div class="rain-detail" id="rainDetail">
+                กำลังโหลดข้อมูลพยากรณ์อากาศ
+            </div>
+
+        </div>
+
+
+        <div class="forecast-grid" id="forecastGrid">
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+
+<!-- SENSOR CARDS -->
+
+<section class="cards">
+
+
+    <!-- WATER LEVEL -->
+
     <div class="card water-card">
-      <div class="card-header">
-        <span class="card-icon">🌊</span>
-        <span>ระดับน้ำ</span>
-      </div>
 
-      <div class="value">
-        <span id="water_level">--</span>
-        <span class="unit">cm</span>
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Water Level
-      </div>
+            <span class="card-icon">
+                🌊
+            </span>
 
-      <div class="water-bar">
-        <div id="waterProgress"></div>
-      </div>
+            ระดับน้ำ
+
+        </div>
+
+        <div class="value">
+
+            <span id="water_level">
+                --
+            </span>
+
+            <span class="unit">
+                cm
+            </span>
+
+        </div>
+
+        <div class="description">
+            Water Level
+        </div>
+
+        <div class="water-bar">
+
+            <div id="waterProgress"></div>
+
+        </div>
+
     </div>
 
-    <!-- Rainfall -->
+
+
+    <!-- RAIN -->
+
     <div class="card">
-      <div class="card-header">
-        <span class="card-icon">🌧️</span>
-        <span>ปริมาณฝน</span>
-      </div>
 
-      <div class="value">
-        <span id="rainfall">--</span>
-        <span class="unit">mm/h</span>
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Rainfall Intensity
-      </div>
+            <span class="card-icon">
+                🌧️
+            </span>
+
+            ปริมาณฝน
+
+        </div>
+
+        <div class="value">
+
+            <span id="rainfall">
+                --
+            </span>
+
+            <span class="unit">
+                mm/h
+            </span>
+
+        </div>
+
+        <div class="description">
+            Rainfall Intensity
+        </div>
+
     </div>
 
-    <!-- Water Rate -->
+
+
+    <!-- WATER RATE -->
+
     <div class="card">
-      <div class="card-header">
-        <span class="card-icon">📈</span>
-        <span>อัตราการเพิ่มระดับน้ำ</span>
-      </div>
 
-      <div class="value">
-        <span id="water_rate">--</span>
-        <span class="unit">cm/min</span>
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Water Level Rise Rate
-      </div>
+            <span class="card-icon">
+                📈
+            </span>
+
+            อัตราเพิ่มระดับน้ำ
+
+        </div>
+
+        <div class="value">
+
+            <span id="water_rate">
+                --
+            </span>
+
+            <span class="unit">
+                cm/min
+            </span>
+
+        </div>
+
+        <div class="description">
+            Water Level Rise Rate
+        </div>
+
     </div>
 
-    <!-- Temperature -->
+
+
+    <!-- TEMPERATURE -->
+
     <div class="card">
-      <div class="card-header">
-        <span class="card-icon">🌡️</span>
-        <span>อุณหภูมิ</span>
-      </div>
 
-      <div class="value">
-        <span id="temperature">--</span>
-        <span class="unit">°C</span>
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Temperature
-      </div>
+            <span class="card-icon">
+                🌡️
+            </span>
+
+            อุณหภูมิ
+
+        </div>
+
+        <div class="value">
+
+            <span id="temperature">
+                --
+            </span>
+
+            <span class="unit">
+                °C
+            </span>
+
+        </div>
+
+        <div class="description">
+            Temperature
+        </div>
+
     </div>
 
-    <!-- Humidity -->
+
+
+    <!-- HUMIDITY -->
+
     <div class="card">
-      <div class="card-header">
-        <span class="card-icon">💧</span>
-        <span>ความชื้น</span>
-      </div>
 
-      <div class="value">
-        <span id="humidity">--</span>
-        <span class="unit">%</span>
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Relative Humidity
-      </div>
+            <span class="card-icon">
+                💧
+            </span>
+
+            ความชื้น
+
+        </div>
+
+        <div class="value">
+
+            <span id="humidity">
+                --
+            </span>
+
+            <span class="unit">
+                %
+            </span>
+
+        </div>
+
+        <div class="description">
+            Relative Humidity
+        </div>
+
     </div>
 
-    <!-- Drain Status -->
+
+
+    <!-- DRAIN -->
+
     <div class="card">
-      <div class="card-header">
-        <span class="card-icon">🚰</span>
-        <span>ระบบระบายน้ำ</span>
-      </div>
 
-      <div class="value" id="drain_status">
-        --
-      </div>
+        <div class="card-title">
 
-      <div class="card-description">
-        Drainage System
-      </div>
+            <span class="card-icon">
+                🚰
+            </span>
+
+            ระบบระบายน้ำ
+
+        </div>
+
+        <div
+            class="value"
+            id="drain_status">
+
+            --
+
+        </div>
+
+        <div class="description">
+            Drainage System
+        </div>
+
     </div>
 
-  </section>
 
-  <!-- Chart -->
-  <section class="chart-box">
+</section>
+
+
+
+<!-- CHART -->
+
+<section class="chart-box">
+
     <div class="chart-title">
-      📊 ประวัติระดับน้ำแบบ Real-Time
+        📊 ประวัติระดับน้ำแบบ Real-Time
     </div>
 
     <div class="chart-container">
-      <canvas id="waterChart"></canvas>
+
+        <canvas id="waterChart"></canvas>
+
     </div>
-  </section>
+
+</section>
+
 
 </main>
 
+
 <footer>
-  Smart Flood Prevention & Monitoring System
-  <br>
-  ESP32 • ESPHome • Firebase • GitHub Pages
+
+Smart Flood Prevention & Monitoring System
+
+<br>
+
+ESP32 • ESPHome • Firebase • Weather Forecast
+
 </footer>
 
 
-<!-- Firebase -->
+
 <script type="module">
 
-  import {
-    initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-  import {
+/* =========================================
+   FIREBASE
+========================================= */
+
+import {
+    initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+import {
     getDatabase,
     ref,
     onValue,
     query,
     limitToLast
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
-  /* =========================
-     FIREBASE CONFIG
-  ========================= */
+const firebaseConfig = {
 
-  const firebaseConfig = {
     databaseURL:
-      "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
-  };
+    "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
+
+};
 
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app =
+    initializeApp(firebaseConfig);
+
+const db =
+    getDatabase(app);
 
 
-  /* =========================
-     ELEMENTS
-  ========================= */
 
-  const waterLevel = document.getElementById("water_level");
-  const rainfall = document.getElementById("rainfall");
-  const waterRate = document.getElementById("water_rate");
-  const temperature = document.getElementById("temperature");
-  const humidity = document.getElementById("humidity");
-  const drainStatus = document.getElementById("drain_status");
+/* =========================================
+   ELEMENTS
+========================================= */
 
-  const status = document.getElementById("status");
-  const lastUpdate = document.getElementById("lastUpdate");
-  const waterProgress = document.getElementById("waterProgress");
+const waterLevel =
+    document.getElementById("water_level");
+
+const rainfall =
+    document.getElementById("rainfall");
+
+const waterRate =
+    document.getElementById("water_rate");
+
+const temperature =
+    document.getElementById("temperature");
+
+const humidity =
+    document.getElementById("humidity");
+
+const drainStatus =
+    document.getElementById("drain_status");
+
+const status =
+    document.getElementById("status");
+
+const lastUpdate =
+    document.getElementById("lastUpdate");
+
+const waterProgress =
+    document.getElementById("waterProgress");
 
 
-  /* =========================
-     STATUS
-  ========================= */
 
-  function updateStatus(level) {
+/* =========================================
+   WATER STATUS
+========================================= */
+
+function updateStatus(level){
 
     status.className = "";
 
-    if (level < 30) {
+    if(level < 30){
 
-      status.textContent = "🟢 NORMAL";
-      status.classList.add("status-normal");
+        status.textContent =
+            "🟢 NORMAL";
 
-    } else if (level < 60) {
-
-      status.textContent = "🟡 WARNING";
-      status.classList.add("status-warning");
-
-    } else if (level < 80) {
-
-      status.textContent = "🟠 HIGH RISK";
-      status.classList.add("status-danger");
-
-    } else {
-
-      status.textContent = "🔴 CRITICAL";
-      status.classList.add("status-critical");
+        status.classList.add("normal");
 
     }
-  }
 
+    else if(level < 60){
 
-  /* =========================
-     REAL-TIME LATEST DATA
-  ========================= */
+        status.textContent =
+            "🟡 WARNING";
 
-  const latestRef = ref(db, "latest");
+        status.classList.add("warning");
 
-  onValue(latestRef, (snapshot) => {
-
-    const data = snapshot.val();
-
-    if (!data) {
-      console.log("ไม่พบข้อมูล latest");
-      return;
     }
 
-    console.log("Firebase latest:", data);
+    else if(level < 80){
 
+        status.textContent =
+            "🟠 HIGH RISK";
 
-    /* Water Level */
+        status.classList.add("danger");
 
-    if (data.water_level !== undefined) {
-
-      const level = Number(data.water_level);
-
-      waterLevel.textContent = level.toFixed(1);
-
-      updateStatus(level);
-
-      // Maximum display level = 100 cm
-      let progress = (level / 100) * 100;
-
-      if (progress > 100) progress = 100;
-      if (progress < 0) progress = 0;
-
-      waterProgress.style.width = progress + "%";
     }
 
+    else{
 
-    /* Rainfall */
+        status.textContent =
+            "🔴 CRITICAL";
 
-    if (data.rainfall !== undefined) {
-      rainfall.textContent =
-        Number(data.rainfall).toFixed(1);
+        status.classList.add("critical");
+
+    }
+
+}
+
+
+
+/* =========================================
+   FIREBASE LATEST
+========================================= */
+
+const latestRef =
+    ref(db,"latest");
+
+
+onValue(latestRef,(snapshot)=>{
+
+    const data =
+        snapshot.val();
+
+    if(!data){
+
+        console.log(
+            "ไม่พบข้อมูล latest"
+        );
+
+        return;
+
     }
 
 
-    /* Water Rate */
+    console.log(
+        "Firebase:",
+        data
+    );
 
-    if (data.water_rate !== undefined) {
-      waterRate.textContent =
-        Number(data.water_rate).toFixed(2);
+
+    /* WATER LEVEL */
+
+    if(data.water_level !== undefined){
+
+        const level =
+            Number(data.water_level);
+
+        waterLevel.textContent =
+            level.toFixed(1);
+
+        updateStatus(level);
+
+
+        let progress =
+            (level / 100) * 100;
+
+        progress =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    progress
+                )
+            );
+
+        waterProgress.style.width =
+            progress + "%";
+
     }
 
 
-    /* Temperature */
+    /* RAIN */
 
-    if (data.temperature !== undefined) {
-      temperature.textContent =
-        Number(data.temperature).toFixed(1);
+    if(data.rainfall !== undefined){
+
+        rainfall.textContent =
+            Number(data.rainfall)
+            .toFixed(1);
+
     }
 
 
-    /* Humidity */
+    /* WATER RATE */
 
-    if (data.humidity !== undefined) {
-      humidity.textContent =
-        Number(data.humidity).toFixed(1);
+    if(data.water_rate !== undefined){
+
+        waterRate.textContent =
+            Number(data.water_rate)
+            .toFixed(2);
+
     }
 
 
-    /* Drain Status */
+    /* TEMPERATURE */
 
-    if (data.drain_status !== undefined) {
+    if(data.temperature !== undefined){
 
-      if (Number(data.drain_status) === 1) {
+        temperature.textContent =
+            Number(data.temperature)
+            .toFixed(1);
 
-        drainStatus.textContent = "ON";
-        drainStatus.style.color = "#42e695";
-
-      } else {
-
-        drainStatus.textContent = "OFF";
-        drainStatus.style.color = "#ff7675";
-
-      }
     }
 
 
-    /* Last Update */
+    /* HUMIDITY */
 
-    const now = new Date();
+    if(data.humidity !== undefined){
+
+        humidity.textContent =
+            Number(data.humidity)
+            .toFixed(1);
+
+    }
+
+
+    /* DRAIN */
+
+    if(data.drain_status !== undefined){
+
+        if(
+            Number(data.drain_status) === 1
+        ){
+
+            drainStatus.textContent =
+                "ON";
+
+            drainStatus.style.color =
+                "#43e59a";
+
+        }
+
+        else{
+
+            drainStatus.textContent =
+                "OFF";
+
+            drainStatus.style.color =
+                "#ff6b6b";
+
+        }
+
+    }
+
 
     lastUpdate.textContent =
-      "Last Update: " +
-      now.toLocaleTimeString("th-TH");
+        new Date()
+        .toLocaleTimeString(
+            "th-TH"
+        );
 
-  });
+});
 
 
-  /* =========================
-     WATER LEVEL CHART
-  ========================= */
 
-  const ctx =
-    document.getElementById("waterChart");
+/* =========================================
+   WATER LEVEL CHART
+========================================= */
 
-  const waterChart = new Chart(ctx, {
+const ctx =
+    document.getElementById(
+        "waterChart"
+    );
 
-    type: "line",
 
-    data: {
-      labels: [],
-      datasets: [{
-        label: "Water Level (cm)",
-        data: [],
-        tension: 0.35,
-        fill: true,
-        borderWidth: 3,
-        pointRadius: 3
-      }]
-    },
+const waterChart =
+    new Chart(
+        ctx,
+        {
 
-    options: {
+            type:"line",
 
-      responsive: true,
+            data:{
 
-      maintainAspectRatio: false,
+                labels:[],
 
-      plugins: {
-        legend: {
-          labels: {
-            color: "#ffffff"
-          }
+                datasets:[{
+
+                    label:
+                    "Water Level (cm)",
+
+                    data:[],
+
+                    tension:.35,
+
+                    fill:true,
+
+                    borderWidth:3,
+
+                    pointRadius:3
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+
+                        labels:{
+
+                            color:"#fff"
+
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        ticks:{
+                            color:"#7892a8"
+                        },
+
+                        grid:{
+                            color:
+                            "rgba(255,255,255,.05)"
+                        }
+
+                    },
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        ticks:{
+                            color:"#7892a8"
+                        },
+
+                        grid:{
+                            color:
+                            "rgba(255,255,255,.05)"
+                        }
+
+                    }
+
+                }
+
+            }
+
         }
-      },
+    );
 
-      scales: {
 
-        x: {
-          ticks: {
-            color: "#8ca4ba"
-          },
 
-          grid: {
-            color: "rgba(255,255,255,0.05)"
-          }
-        },
+/* =========================================
+   FIREBASE HISTORY
+========================================= */
 
-        y: {
+const historyRef =
+    query(
+        ref(db,"history"),
+        limitToLast(30)
+    );
 
-          beginAtZero: true,
 
-          ticks: {
-            color: "#8ca4ba"
-          },
+onValue(
+    historyRef,
+    (snapshot)=>{
 
-          grid: {
-            color: "rgba(255,255,255,0.05)"
-          }
-        }
+        const data =
+            snapshot.val();
 
-      }
+        if(!data)
+            return;
+
+
+        const entries =
+            Object.values(data);
+
+
+        entries.sort(
+            (a,b)=>
+                Number(a.timestamp || 0)
+                -
+                Number(b.timestamp || 0)
+        );
+
+
+        waterChart.data.labels =
+            [];
+
+        waterChart.data.datasets[0].data =
+            [];
+
+
+        entries.forEach(item=>{
+
+            const time =
+                item.timestamp
+                ?
+                new Date(
+                    Number(
+                        item.timestamp
+                    )
+                )
+                :
+                new Date();
+
+
+            waterChart.data.labels.push(
+
+                time.toLocaleTimeString(
+                    "th-TH",
+                    {
+                        hour:"2-digit",
+                        minute:"2-digit"
+                    }
+                )
+
+            );
+
+
+            waterChart
+                .data
+                .datasets[0]
+                .data
+                .push(
+                    Number(
+                        item.water_level || 0
+                    )
+                );
+
+        });
+
+
+        waterChart.update();
+
     }
-
-  });
-
-
-  /* =========================
-     FIREBASE HISTORY
-  ========================= */
-
-  const historyRef = query(
-    ref(db, "history"),
-    limitToLast(30)
-  );
+);
 
 
-  onValue(historyRef, (snapshot) => {
 
-    const data = snapshot.val();
+/* =========================================
+   WEATHER FORECAST
+========================================= */
 
-    if (!data) return;
+/*
+   เปลี่ยนพิกัดตรงนี้ได้
+   ค่าเริ่มต้น = ภูเก็ต
+*/
 
+const LATITUDE =
+    7.8804;
 
-    const entries = Object.values(data);
-
-    entries.sort((a, b) => {
-
-      return Number(a.timestamp || 0)
-           - Number(b.timestamp || 0);
-
-    });
-
-
-    waterChart.data.labels = [];
-
-    waterChart.data.datasets[0].data = [];
+const LONGITUDE =
+    98.3923;
 
 
-    entries.forEach(item => {
+async function loadWeather(){
 
-      const time = item.timestamp
-        ? new Date(Number(item.timestamp))
-        : new Date();
+    try{
 
-      waterChart.data.labels.push(
-        time.toLocaleTimeString("th-TH", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit"
-        })
-      );
+        const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=precipitation_probability,precipitation,rain,weather_code&forecast_hours=12&timezone=Asia%2FBangkok`;
 
 
-      waterChart.data.datasets[0].data.push(
-        Number(item.water_level || 0)
-      );
-
-    });
+        const response =
+            await fetch(url);
 
 
-    waterChart.update();
+        const weather =
+            await response.json();
 
-  });
 
-</script>
+        const times =
+            weather.hourly.time;
 
-</body>
-</html>
+        const probabilities =
+            weather.hourly
+            .precipitation_probability;
+
+        const precipitation =
+            weather.hourly
+            .precipitation;
+
+        const rain =
+            weather.hourly.rain;
+
+
+        /* =========================
+           FIND WHEN RAIN STOPS
+        ========================= */
+
+        let stopIndex =
+            -1;
+
+
+        for(
+            let i=0;
+            i<Math.min(
+                12,
+                times.length
+            );
+            i++
+        ){
+
+            /*
+              ถือว่าฝนมีแนวโน้มจะหยุด
+              เมื่อโอกาสฝน <= 30%
+              และปริมาณฝน < 0.2 mm
+            */
+
+            if(
+                probabilities[i] <= 30 &&
+                rain[i] < 0.2
+            ){
+
+                stopIndex = i;
+
+                break;
+
+            }
+
+        }
+
+
+        const rainResult =
+            document.getElementById(
+                "rainResult"
+            );
+
+        const rainDetail =
+            document.getElementById(
+                "rainDetail"
+            );
+
+        const rainIcon =
+            document.getElementById(
+                "rainIcon"
+            );
