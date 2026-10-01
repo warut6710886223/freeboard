@@ -1,988 +1,177 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Smart Flood Monitoring</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link
-  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
-  rel="stylesheet"
->
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
-
-
-<style>
-
-:root{
-  --bg:#06101c;
-  --sky:linear-gradient(180deg,#0b2238,#07131f);
-  --panel:rgba(12,26,43,.78);
-  --hero:linear-gradient(135deg,#0e2c47,#0a1b2e);
-  --track:#13293f;
-  --line:rgba(255,255,255,.09);
-  --tx:#eaf2fa;
-  --mut:#9ab2c8;
-  --acc:#3cc8ff;
-  --ok:#3ddc97;
-  --warn:#ffd166;
-  --hi:#ff9f43;
-  --crit:#ff5c5c;
-}
-
-body[data-wx=sunny]{
-  --sky:linear-gradient(180deg,#4db8f5 0%,#a9e0ff 40%,#eaf7ff 100%);
-  --panel:rgba(255,255,255,.76);
-  --hero:linear-gradient(135deg,#fff3c4,#ffffffdd);
-  --track:#cfe6f5;
-  --line:rgba(10,60,100,.13);
-  --tx:#0b2a42;
-  --mut:#48677f;
-  --acc:#0a7fd0;
-  --ok:#0f9d63;
-  --warn:#b7791f;
-  --hi:#d9730d;
-  --crit:#d63a3a;
-}
-
-body[data-wx=drizzle]{
-  --sky:linear-gradient(180deg,#3d5a73,#1d3347 60%,#13222f);
-  --panel:rgba(18,36,52,.74);
-  --hero:linear-gradient(135deg,#2a4a63,#17293a);
-}
-
-body[data-wx=rain]{
-  --sky:linear-gradient(180deg,#1b3550,#0d1f33 60%,#081420);
-}
-
-body[data-wx=storm]{
-  --sky:linear-gradient(180deg,#1c1830,#0e1226 60%,#070a16);
-  --hero:linear-gradient(135deg,#2a2150,#120f26);
-  --acc:#b79cff;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
-body{
-  font-family:"IBM Plex Sans Thai",Arial,sans-serif;
-  background:var(--sky) fixed,var(--bg);
-  color:var(--tx);
-  min-height:100vh;
-  transition:color .6s;
-}
-
-#fx{
-  position:fixed;
-  inset:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-  z-index:0;
-}
-
-.wx{
-  font-size:14px;
-  font-weight:600;
-  padding:7px 14px;
-  border-radius:99px;
-  background:var(--panel);
-  border:1px solid var(--line);
-}
-
-.hr{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.demo{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  align-items:center;
-  font-size:13px;
-  color:var(--mut);
-}
-
-.demo button{
-  font:inherit;
-  color:var(--tx);
-  background:var(--panel);
-  border:1px solid var(--line);
-  padding:6px 12px;
-  border-radius:99px;
-  cursor:pointer;
-}
-
-.demo button.on{
-  border-color:var(--acc);
-  color:var(--acc);
-}
-
-header,
-main,
-footer{
-  position:relative;
-  z-index:1;
-}
-
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding:18px 28px;
-  border-bottom:1px solid var(--line);
-}
-
-header h1{
-  font-size:20px;
-  font-weight:700;
-}
-
-header p{
-  color:var(--mut);
-  font-size:13px;
-  margin-top:2px;
-}
-
-.live{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:13px;
-  color:var(--ok);
-  border:1px solid #3ddc9744;
-  padding:7px 14px;
-  border-radius:99px;
-}
-
-.dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--ok);
-  animation:pulse 1.8s infinite;
-}
-
-@keyframes pulse{
-  50%{
-    opacity:.3;
-  }
-}
-
-main{
-  max-width:1280px;
-  margin:auto;
-  padding:22px;
-  display:grid;
-  gap:18px;
-}
-
-.panel{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:16px;
-  padding:20px;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-
-.lbl{
-  color:var(--mut);
-  font-size:13px;
-}
-
-.hero{
-  display:grid;
-  grid-template-columns:1.25fr 1fr;
-  gap:18px;
-}
-
-.predict{
-  position:relative;
-  overflow:hidden;
-  background:var(--hero);
-}
-
-.predict .big{
-  display:flex;
-  align-items:baseline;
-  gap:10px;
-  margin:14px 0 6px;
-  flex-wrap:wrap;
-}
-
-.predict .eta{
-  font-size:64px;
-  font-weight:700;
-  line-height:1;
-  color:var(--acc);
-}
-
-.predict .eta.stop{
-  color:var(--ok);
-}
-
-.predict .eta.none{
-  color:var(--warn);
-}
-
-.predict .eta.wait{
-  color:var(--mut);
-}
-
-.predict .u{
-  font-size:20px;
-  color:var(--mut);
-}
-
-.msg{
-  font-size:15px;
-  line-height:1.6;
-  max-width:520px;
-}
-
-.meta{
-  display:flex;
-  gap:22px;
-  flex-wrap:wrap;
-  margin-top:18px;
-  padding-top:16px;
-  border-top:1px solid var(--line);
-}
-
-.meta b{
-  display:block;
-  font-size:17px;
-  font-weight:600;
-  margin-top:2px;
-}
-
-.conf{
-  height:6px;
-  background:var(--track);
-  border-radius:9px;
-  overflow:hidden;
-  width:120px;
-  margin-top:8px;
-}
-
-.conf i{
-  display:block;
-  height:100%;
-  width:0;
-  background:var(--acc);
-  transition:width .6s;
-}
-
-.rain-bg{
-  position:absolute;
-  right:-10px;
-  top:-10px;
-  font-size:130px;
-  opacity:.07;
-  pointer-events:none;
-}
-
-.status{
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-}
-
-#status{
-  font-size:30px;
-  font-weight:700;
-  margin:8px 0;
-}
-
-.s-ok{
-  color:var(--ok);
-}
-
-.s-warn{
-  color:var(--warn);
-}
-
-.s-hi{
-  color:var(--hi);
-}
-
-.s-crit{
-  color:var(--crit);
-}
-
-.level{
-  display:flex;
-  align-items:baseline;
-  gap:6px;
-}
-
-.level b{
-  font-size:44px;
-  font-weight:700;
-}
-
-.bar{
-  height:12px;
-  border-radius:9px;
-  background:var(--track);
-  position:relative;
-  overflow:hidden;
-  margin-top:14px;
-}
-
-.bar i{
-  display:block;
-  height:100%;
-  width:0;
-  border-radius:9px;
-  background:linear-gradient(90deg,#21d4fd,#2f6bff);
-  transition:width .6s;
-}
-
-.ticks{
-  display:flex;
-  justify-content:space-between;
-  font-size:11px;
-  color:var(--mut);
-  margin-top:6px;
-}
-
-#lastUpdate{
-  font-size:12px;
-  color:var(--mut);
-  margin-top:14px;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:14px;
-}
-
-.card .v{
-  font-size:28px;
-  font-weight:600;
-  margin-top:10px;
-}
-
-.card .v small{
-  font-size:13px;
-  color:var(--mut);
-  font-weight:400;
-  margin-left:4px;
-}
-
-.card .ic{
-  font-size:20px;
-  margin-right:6px;
-}
-
-.chart-wrap{
-  height:320px;
-  margin-top:12px;
-}
-
-footer{
-  text-align:center;
-  color:#5d758b;
-  font-size:12px;
-  padding:18px;
-}
-
-@media(max-width:1000px){
-
-  .hero{
-    grid-template-columns:1fr;
-  }
-
-  .cards{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-}
-
-@media(max-width:600px){
-
-  header{
-    padding:14px 16px;
-  }
-
-  main{
-    padding:14px;
-  }
-
-  .cards{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .predict .eta{
-    font-size:50px;
-  }
-
-}
-
-@media(prefers-reduced-motion:reduce){
-
-  .dot{
-    animation:none;
-  }
-
-}
-
-</style>
-</head>
-
-
-<body data-wx="sunny">
-
-<canvas id="fx"></canvas>
-
-
-<header>
-
-  <div>
-
-    <h1>🌊 Smart Flood Monitoring</h1>
-
-    <p>
-      ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ
-    </p>
-
-  </div>
-
-
-  <div class="hr">
-
-    <div
-      class="wx"
-      id="wx"
-    >
-      ☀️ ฟ้าสดใส
-    </div>
-
-    <div class="live">
-
-      <span class="dot"></span>
-
-      LIVE
-
-    </div>
-
-  </div>
-
-</header>
-
-
-<main>
-
-
-<!-- WEATHER DEMO -->
-
-<div class="demo" id="demo">
-
-  ดูตัวอย่างธีม:
-
-  <button data-k="auto" class="on">
-    อัตโนมัติ
-  </button>
-
-  <button data-k="sunny">
-    ☀️ ฟ้าสดใส
-  </button>
-
-  <button data-k="drizzle">
-    🌦️ ฝนปรอย
-  </button>
-
-  <button data-k="rain">
-    🌧️ ฝนตก
-  </button>
-
-  <button data-k="storm">
-    ⛈️ พายุฝน
-  </button>
-
-</div>
-
-
-<!-- HERO -->
-
-<section class="hero">
-
-
-  <div class="panel predict">
-
-    <div class="rain-bg">
-      🌧️
-    </div>
-
-    <div class="lbl">
-      คาดการณ์ฝนหยุด
-    </div>
-
-
-    <div class="big">
-
-      <span
-        id="eta"
-        class="eta wait"
-      >
-        --
-      </span>
-
-      <span
-        id="etaUnit"
-        class="u"
-      ></span>
-
-    </div>
-
-
-    <p
-      id="etaMsg"
-      class="msg"
-    >
-      กำลังรวบรวมข้อมูลฝนย้อนหลัง...
-    </p>
-
-
-    <div class="meta">
-
-
-      <div>
-
-        <span class="lbl">
-          คาดว่าฝนหยุดประมาณ
-        </span>
-
-        <b id="etaClock">
-          --
-        </b>
-
-      </div>
-
-
-      <div>
-
-        <span class="lbl">
-          แนวโน้มฝน
-        </span>
-
-        <b id="trend">
-          --
-        </b>
-
-      </div>
-
-
-      <div>
-
-        <span class="lbl">
-          ความเชื่อมั่น
-        </span>
-
-        <b id="confTxt">
-          --
-        </b>
-
-        <div class="conf">
-
-          <i id="confBar"></i>
-
-        </div>
-
-      </div>
-
-
-    </div>
-
-  </div>
-
-
-  <!-- WATER STATUS -->
-
-  <div class="panel status">
-
-    <div>
-
-      <div class="lbl">
-        สถานะระดับน้ำ
-      </div>
-
-
-      <div
-        id="status"
-        class="s-ok"
-      >
-        กำลังโหลด...
-      </div>
-
-
-      <div class="level">
-
-        <b id="water_level">
-          --
-        </b>
-
-        <span class="lbl">
-          cm
-        </span>
-
-      </div>
-
-
-      <div class="bar">
-
-        <i id="waterProgress"></i>
-
-      </div>
-
-
-      <div class="ticks">
-
-        <span>0</span>
-        <span>30</span>
-        <span>60</span>
-        <span>80</span>
-        <span>100 cm</span>
-
-      </div>
-
-    </div>
-
-
-    <div id="lastUpdate">
-
-      อัปเดตล่าสุด: -
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- SENSOR CARDS -->
-
-<section class="cards">
-
-
-  <div class="panel card">
-
-    <div class="lbl">
-
-      <span class="ic">🌧️</span>
-
-      ปริมาณฝน
-
-    </div>
-
-    <div class="v">
-
-      <span id="rainfall">
-        --
-      </span>
-
-      <small>
-        mm/h
-      </small>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel card">
-
-    <div class="lbl">
-
-      <span class="ic">📈</span>
-
-      น้ำเพิ่มขึ้น
-
-    </div>
-
-    <div class="v">
-
-      <span id="water_rate">
-        --
-      </span>
-
-      <small>
-        cm/min
-      </small>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel card">
-
-    <div class="lbl">
-
-      <span class="ic">🌡️</span>
-
-      อุณหภูมิ
-
-    </div>
-
-    <div class="v">
-
-      <span id="temperature">
-        --
-      </span>
-
-      <small>
-        °C
-      </small>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel card">
-
-    <div class="lbl">
-
-      <span class="ic">💧</span>
-
-      ความชื้น
-
-    </div>
-
-    <div class="v">
-
-      <span id="humidity">
-        --
-      </span>
-
-      <small>
-        %
-      </small>
-
-    </div>
-
-  </div>
-
-
-  <div class="panel card">
-
-    <div class="lbl">
-
-      <span class="ic">🚰</span>
-
-      ระบบระบายน้ำ
-
-    </div>
-
-    <div
-      class="v"
-      id="drain_status"
-    >
-      --
-    </div>
-
-  </div>
-
-
-</section>
-
-
-<!-- CHART -->
-
-<section class="panel">
-
-  <div style="font-weight:600">
-
-    📊 ประวัติระดับน้ำและปริมาณฝน
-
-  </div>
-
-
-  <div class="chart-wrap">
-
-    <canvas id="waterChart"></canvas>
-
-  </div>
-
-</section>
-
-
-</main>
-
-
-<footer>
-
-  Smart Flood Prevention &amp;
-  Monitoring System ·
-  ESP32 ·
-  ESPHome ·
-  Firebase
-
-</footer>
-
-
 <script type="module">
 
-
-/* =====================================================
-   FIREBASE
-   ===================================================== */
-
-import {
-  initializeApp
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getDatabase,
   ref,
-  onValue,
-  query,
-  limitToLast
+  onValue
 }
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+
+/* =========================
+   FIREBASE CONFIG
+========================= */
 
 const firebaseConfig = {
-
   databaseURL:
-  "https://iot-223-cd3eb-default-rtdb.asia-southeast1.firebasedatabase.app/"
-
+    "https://iot-223-cd3eb-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 
-const app =
-  initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
+const db = getDatabase(app);
 
-const db =
-  getDatabase(app);
-
-
-const $ =
-  id => document.getElementById(id);
+console.log("Firebase connected");
 
 
 
-/* =====================================================
+/* =========================
+   ELEMENT
+========================= */
+
+const waterLevel =
+  document.getElementById("water_level");
+
+const rainfall =
+  document.getElementById("rainfall");
+
+const waterRate =
+  document.getElementById("water_rate");
+
+const temperature =
+  document.getElementById("temperature");
+
+const humidity =
+  document.getElementById("humidity");
+
+const drainStatus =
+  document.getElementById("drain_status");
+
+const status =
+  document.getElementById("status");
+
+const progress =
+  document.getElementById("waterProgress");
+
+const lastUpdate =
+  document.getElementById("lastUpdate");
+
+
+
+/* =========================
+   CHECK ELEMENT
+========================= */
+
+console.log("HTML elements:", {
+
+  waterLevel,
+  rainfall,
+  waterRate,
+  temperature,
+  humidity,
+  drainStatus,
+  status
+
+});
+
+
+
+/* =========================
    STATUS
-   ===================================================== */
+========================= */
 
 function updateStatus(level){
 
-  const s =
-    $("status");
-
-
-  let text;
-  let cls;
-
-
   if(level < 30){
 
-    text =
+    status.textContent =
       "🟢 ปกติ";
 
-    cls =
+    status.className =
       "s-ok";
 
   }
 
   else if(level < 60){
 
-    text =
+    status.textContent =
       "🟡 เฝ้าระวัง";
 
-    cls =
+    status.className =
       "s-warn";
 
   }
 
   else if(level < 80){
 
-    text =
+    status.textContent =
       "🟠 เสี่ยงสูง";
 
-    cls =
+    status.className =
       "s-hi";
 
   }
 
   else{
 
-    text =
+    status.textContent =
       "🔴 วิกฤต";
 
-    cls =
+    status.className =
       "s-crit";
 
   }
 
 
-  s.textContent =
-    text;
-
-  s.className =
-    cls;
+  progress.style.width =
+    Math.min(
+      Math.max(level,0),
+      100
+    ) + "%";
 
 }
 
 
 
-/* =====================================================
-   LATEST SENSOR DATA
-   Firebase Path:
+/* =========================
+   READ /sensors
+========================= */
 
-   /sensors
-   ===================================================== */
-
-let latestRain = null;
+const sensorsRef =
+  ref(db,"sensors");
 
 
 onValue(
 
-  ref(db,"sensors"),
+  sensorsRef,
 
-  snapshot => {
+  (snapshot) => {
+
+    console.log(
+      "========== FIREBASE DATA =========="
+    );
+
+
+    console.log(
+      snapshot.val()
+    );
 
 
     const data =
       snapshot.val();
 
 
-    console.log(
-      "Firebase /sensors:",
-      data
-    );
-
-
     if(!data){
 
-      console.warn(
-        "ไม่พบข้อมูล /sensors"
+      console.error(
+        "ไม่พบข้อมูลใน /sensors"
       );
 
-      $("status").textContent =
+      status.textContent =
         "⚠️ ไม่พบข้อมูล";
 
       return;
@@ -993,36 +182,21 @@ onValue(
 
     /* WATER LEVEL */
 
-    if(
-      data.water_level !==
-      undefined
-    ){
+    if(data.water_level != null){
 
-      const level =
+      const value =
         Number(
           data.water_level
         );
 
 
-      $("water_level")
-        .textContent =
-        level.toFixed(1);
+      waterLevel.textContent =
+        value.toFixed(1);
 
 
       updateStatus(
-        level
+        value
       );
-
-
-      $("waterProgress")
-        .style.width =
-        Math.max(
-          0,
-          Math.min(
-            100,
-            level
-          )
-        ) + "%";
 
     }
 
@@ -1030,23 +204,12 @@ onValue(
 
     /* RAIN */
 
-    if(
-      data.rainfall !==
-      undefined
-    ){
+    if(data.rainfall != null){
 
-      latestRain =
+      rainfall.textContent =
         Number(
           data.rainfall
-        );
-
-
-      $("rainfall")
-        .textContent =
-        latestRain.toFixed(1);
-
-
-      applyWeather();
+        ).toFixed(1);
 
     }
 
@@ -1054,16 +217,12 @@ onValue(
 
     /* WATER RATE */
 
-    if(
-      data.water_rate !==
-      undefined
-    ){
+    if(data.water_rate != null){
 
-      $("water_rate")
-        .textContent =
+      waterRate.textContent =
         Number(
           data.water_rate
-        ).toFixed(2);
+        ).toFixed(1);
 
     }
 
@@ -1071,13 +230,9 @@ onValue(
 
     /* TEMPERATURE */
 
-    if(
-      data.temperature !==
-      undefined
-    ){
+    if(data.temperature != null){
 
-      $("temperature")
-        .textContent =
+      temperature.textContent =
         Number(
           data.temperature
         ).toFixed(1);
@@ -1088,13 +243,9 @@ onValue(
 
     /* HUMIDITY */
 
-    if(
-      data.humidity !==
-      undefined
-    ){
+    if(data.humidity != null){
 
-      $("humidity")
-        .textContent =
+      humidity.textContent =
         Number(
           data.humidity
         ).toFixed(1);
@@ -1105,55 +256,63 @@ onValue(
 
     /* DRAIN */
 
-    if(
-      data.drain_status !==
-      undefined
-    ){
+    if(data.drain_status != null){
 
-      const isOn =
+      const drain =
         Number(
           data.drain_status
-        ) === 1;
+        );
 
 
-      const element =
-        $("drain_status");
+      if(drain === 1){
 
+        drainStatus.textContent =
+          "ทำงาน";
 
-      element.textContent =
-        isOn
-          ? "ทำงาน"
-          : "หยุด";
+        drainStatus.style.color =
+          "var(--ok)";
 
+      }
 
-      element.style.color =
-        isOn
-          ? "var(--ok)"
-          : "var(--crit)";
+      else{
+
+        drainStatus.textContent =
+          "หยุด";
+
+        drainStatus.style.color =
+          "var(--crit)";
+
+      }
 
     }
 
 
 
-    $("lastUpdate")
-      .textContent =
+    /* UPDATE TIME */
+
+    lastUpdate.textContent =
       "อัปเดตล่าสุด: " +
-      new Date()
-        .toLocaleTimeString(
-          "th-TH"
-        );
+      new Date().toLocaleTimeString(
+        "th-TH"
+      );
+
+
+    console.log(
+      "Dashboard updated successfully"
+    );
 
   },
 
-  error => {
+
+  (error) => {
 
     console.error(
-      "Firebase error:",
+      "Firebase ERROR:",
       error
     );
 
-    $("status")
-      .textContent =
+
+    status.textContent =
       "❌ Firebase Error";
 
   }
@@ -1162,14 +321,16 @@ onValue(
 
 
 
-/* =====================================================
+/* =========================
    CHART
-   ===================================================== */
+========================= */
 
 const chart =
 new Chart(
 
-  $("waterChart"),
+  document.getElementById(
+    "waterChart"
+  ),
 
   {
 
@@ -1188,8 +349,6 @@ new Chart(
 
           data:[],
 
-          yAxisID:"y",
-
           borderColor:
             "#3cc8ff",
 
@@ -1200,9 +359,7 @@ new Chart(
 
           tension:.35,
 
-          borderWidth:2.5,
-
-          pointRadius:0
+          yAxisID:"y"
 
         },
 
@@ -1214,21 +371,17 @@ new Chart(
 
           data:[],
 
-          yAxisID:"y1",
-
           borderColor:
             "#ffd166",
-
-          tension:.35,
-
-          borderWidth:2,
-
-          pointRadius:0,
 
           borderDash:[
             5,
             4
-          ]
+          ],
+
+          tension:.35,
+
+          yAxisID:"y1"
 
         }
 
@@ -1251,80 +404,19 @@ new Chart(
 
       },
 
-
-      plugins:{
-
-        legend:{
-
-          labels:{
-
-            color:
-              "#cfe0ee"
-
-          }
-
-        }
-
-      },
-
-
       scales:{
-
-        x:{
-
-          ticks:{
-
-            color:
-              "#8aa3ba",
-
-            maxTicksLimit:
-              8
-
-          },
-
-          grid:{
-
-            color:
-              "rgba(255,255,255,.04)"
-
-          }
-
-        },
-
 
         y:{
 
-          beginAtZero:true,
-
-          ticks:{
-
-            color:
-              "#8aa3ba"
-
-          },
-
-          grid:{
-
-            color:
-              "rgba(255,255,255,.05)"
-
-          }
+          beginAtZero:true
 
         },
-
 
         y1:{
 
           position:"right",
 
           beginAtZero:true,
-
-          ticks:{
-
-            color:
-              "#ffd166"
-
-          },
 
           grid:{
 
@@ -1344,22 +436,23 @@ new Chart(
 
 
 
-/* =====================================================
-   HISTORY
-   Firebase Path:
+/* =========================
+   READ /history
+========================= */
 
-   /history
-   ===================================================== */
+const historyRef =
+  ref(db,"history");
 
 
 onValue(
 
-  query(
-    ref(db,"history"),
-    limitToLast(60)
-  ),
+  historyRef,
 
-  snapshot => {
+  (snapshot) => {
+
+    console.log(
+      "========== HISTORY =========="
+    );
 
 
     const data =
@@ -1367,7 +460,6 @@ onValue(
 
 
     console.log(
-      "Firebase /history:",
       data
     );
 
@@ -1375,7 +467,7 @@ onValue(
     if(!data){
 
       console.warn(
-        "ไม่พบข้อมูล /history"
+        "ยังไม่มีข้อมูล /history"
       );
 
       return;
@@ -1383,156 +475,40 @@ onValue(
     }
 
 
-    const entries =
-      Object.entries(data);
+    const records =
+      Object.values(data);
 
 
-    const rows =
-      entries.map(
-        ([key,item]) => {
+    /* เอา 60 ตัวล่าสุด */
 
-          const d =
-            item || {};
+    const latest =
+      records.slice(-60);
 
 
-          return {
-
-            key:key,
-
-            water:
-              Number(
-                d.water_level || 0
-              ),
-
-            rain:
-              d.rainfall ===
-              undefined
-                ? null
-                : Number(
-                    d.rainfall
-                  ),
-
-            timestamp:
-              Number(
-                d.timestamp || 0
-              )
-
-          };
-
-        }
+    chart.data.labels =
+      latest.map(
+        (_,index) =>
+          "#" + (index + 1)
       );
 
 
-    /*
-
-
-       ถ้า ESPHome ส่ง timestamp
-
-       ใช้เวลาจริง
-
-
-       ถ้ายังไม่มี timestamp
-
-       ใช้เวลาปัจจุบันย้อนหลัง
-
-       ตามลำดับข้อมูล
-
-
-    */
-
-
-    const now =
-      Date.now();
-
-
-    rows.forEach(
-      (row,index) => {
-
-        if(row.timestamp){
-
-          let t =
-            row.timestamp;
-
-
-          if(t < 1000000000000){
-
-            t *= 1000;
-
-          }
-
-
-          row.time =
-            t;
-
-        }
-
-        else{
-
-          row.time =
-            now -
-            (
-              (rows.length -
-               1 -
-               index)
-              * 10000
-            );
-
-        }
-
-      }
-    );
-
-
-    rows.sort(
-      (a,b) =>
-        a.time -
-        b.time
-    );
-
-
-    const show =
-      rows.slice(-60);
-
-
-    /* LABEL */
-
-    chart.data.labels =
-      show.map(
-        row =>
-          new Date(
-            row.time
-          ).toLocaleTimeString(
-            "th-TH",
-            {
-
-              hour:"2-digit",
-
-              minute:"2-digit",
-
-              second:"2-digit"
-
-            }
+    chart.data.datasets[0]
+      .data =
+      latest.map(
+        item =>
+          Number(
+            item.water_level || 0
           )
       );
 
 
-    /* WATER */
-
-    chart.data.datasets[0]
-      .data =
-      show.map(
-        row =>
-          row.water
-      );
-
-
-    /* RAIN */
-
     chart.data.datasets[1]
       .data =
-      show.map(
-        row =>
-          row.rain
+      latest.map(
+        item =>
+          Number(
+            item.rainfall || 0
+          )
       );
 
 
@@ -1541,42 +517,17 @@ onValue(
 
     console.log(
       "Chart updated:",
-      show.length,
+      latest.length,
       "records"
-    );
-
-
-    /* Prediction */
-
-    const points =
-      show
-        .filter(
-          row =>
-            row.rain !== null
-        )
-        .map(
-          row => ({
-
-            t:
-              row.time,
-
-            r:
-              row.rain
-
-          })
-        );
-
-
-    renderPrediction(
-      predictRain(points)
     );
 
   },
 
-  error => {
+
+  (error) => {
 
     console.error(
-      "History error:",
+      "History ERROR:",
       error
     );
 
@@ -1585,124 +536,4 @@ onValue(
 );
 
 
-
-/* =====================================================
-   WEATHER
-   ===================================================== */
-
-const WX = {
-
-  sunny:[
-    "☀️ ฟ้าสดใส",
-    0
-  ],
-
-  drizzle:[
-    "🌦️ ฝนปรอย",
-    70
-  ],
-
-  rain:[
-    "🌧️ ฝนตก",
-    170
-  ],
-
-  storm:[
-    "⛈️ พายุฝน",
-    340
-  ]
-
-};
-
-
-let wk =
-  "sunny";
-
-
-let demoKey =
-  "auto";
-
-
-function weatherKey(){
-
-  if(
-    demoKey !==
-    "auto"
-  ){
-
-    return demoKey;
-
-  }
-
-
-  if(
-    latestRain ===
-    null
-  ){
-
-    return "sunny";
-
-  }
-
-
-  if(
-    latestRain < .2
-  ){
-
-    return "sunny";
-
-  }
-
-
-  if(
-    latestRain < 2.5
-  ){
-
-    return "drizzle";
-
-  }
-
-
-  if(
-    latestRain < 10
-  ){
-
-    return "rain";
-
-  }
-
-
-  return "storm";
-
-}
-
-
-function applyWeather(){
-
-  const key =
-    weatherKey();
-
-
-  wk =
-    key;
-
-
-  document.body.dataset.wx =
-    key;
-
-
-  $("wx").textContent =
-    WX[key][0];
-
-
-  setDrops();
-
-  chart.update();
-
-}
-
-
-
-/* =====================================================
-   WEATHER EFFECT
-   ===================
+</script>
