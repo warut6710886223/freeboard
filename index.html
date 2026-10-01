@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
 <style>
 :root{--bg:#06101c;--sky:linear-gradient(180deg,#0b2238,#07131f);--panel:rgba(12,26,43,.78);--hero:linear-gradient(135deg,#0e2c47,#0a1b2e);--track:#13293f;--line:rgba(255,255,255,.09);--tx:#eaf2fa;--mut:#9ab2c8;--acc:#3cc8ff;--ok:#3ddc97;--warn:#ffd166;--hi:#ff9f43;--crit:#ff5c5c}
 body[data-wx=sunny]{--sky:linear-gradient(180deg,#4db8f5 0%,#a9e0ff 40%,#eaf7ff 100%);--panel:rgba(255,255,255,.76);--hero:linear-gradient(135deg,#fff3c4,#ffffffdd);--track:#cfe6f5;--line:rgba(10,60,100,.13);--tx:#0b2a42;--mut:#48677f;--acc:#0a7fd0;--ok:#0f9d63;--warn:#b7791f;--hi:#d9730d;--crit:#d63a3a}
@@ -156,6 +156,7 @@ onValue(ref(db,"latest"), snap => {
 });
 
 /* ---------- Chart ---------- */
+if(typeof Chart==="undefined"){ document.querySelector(".chart-wrap").textContent="โหลด Chart.js ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตหรือ CDN"; throw new Error("Chart.js not loaded"); }
 const chart = new Chart($("waterChart"), {
   type:"line",
   data:{labels:[],datasets:[
@@ -297,15 +298,16 @@ onValue(query(ref(db,"history"), limitToLast(200)), snap => {
   const rows = Object.values(data).map(i => {
     let t = Number(i.timestamp||0); if(t && t<1e12) t*=1000; // seconds → ms
     return {t, w:Number(i.water_level||0), r:i.rainfall===undefined?null:Number(i.rainfall)};
-  }).filter(i=>i.t).sort((a,b)=>a.t-b.t);
+  });
+  if(rows.every(i=>i.t)) rows.sort((a,b)=>a.t-b.t); // else keep Firebase key order
 
   const show = rows.slice(-60);
-  chart.data.labels = show.map(i=>new Date(i.t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}));
+  chart.data.labels = show.map((i,n)=>i.t?new Date(i.t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}):"#"+(n+1));
   chart.data.datasets[0].data = show.map(i=>i.w);
   chart.data.datasets[1].data = show.map(i=>i.r);
   chart.update();
 
-  renderPrediction(predictRain(rows.filter(i=>i.r!==null).map(i=>({t:i.t,r:i.r}))));
+  renderPrediction(predictRain(rows.filter(i=>i.r!==null&&i.t).map(i=>({t:i.t,r:i.r}))));
 });
 </script>
 </body>
