@@ -1,4 +1,65 @@
-const firebaseConfig = {
-    databaseURL:
-    "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
-};
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Flood Dashboard</title>
+</head>
+
+<body>
+
+    <h1>🌊 Smart Flood Prevention</h1>
+
+    <p>Dashboard กำลังทำงาน</p>
+
+    <p id="water">กำลังโหลด...</p>
+
+    <script type="module">
+
+        import { initializeApp }
+        from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+        import {
+            getDatabase,
+            ref,
+            onValue
+        }
+        from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+
+        const firebaseConfig = {
+
+            databaseURL:
+            "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
+
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+
+        const db = getDatabase(app);
+
+
+        const latestRef = ref(db, "latest");
+
+
+        onValue(latestRef, (snapshot) => {
+
+            const data = snapshot.val();
+
+            console.log(data);
+
+            if (data) {
+
+                document.getElementById("water").textContent =
+                    "ระดับน้ำ: " +
+                    data.water_level +
+                    " cm";
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
