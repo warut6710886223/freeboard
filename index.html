@@ -3,1367 +3,310 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Smart Flood Monitoring</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <style>
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:Arial,"Noto Sans Thai",sans-serif;
-}
-
-body{
-    background:
-        radial-gradient(circle at top right,#123b59 0,#07111f 35%),
-        #07111f;
-    color:#fff;
-    min-height:100vh;
-}
-
-/* HEADER */
-
-header{
-    padding:25px 35px;
-    background:rgba(7,17,31,.85);
-    backdrop-filter:blur(15px);
-    border-bottom:1px solid rgba(255,255,255,.08);
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-}
-
-.logo{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.logo-icon{
-    width:55px;
-    height:55px;
-    border-radius:16px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    font-size:30px;
-
-    background:linear-gradient(135deg,#00c6ff,#0072ff);
-    box-shadow:0 0 30px rgba(0,170,255,.3);
-}
-
-.logo h1{
-    font-size:24px;
-    letter-spacing:1px;
-}
-
-.logo p{
-    color:#7f9bb3;
-    margin-top:5px;
-    font-size:13px;
-}
-
-.live{
-    display:flex;
-    align-items:center;
-    gap:8px;
-
-    padding:10px 17px;
-    border-radius:30px;
-
-    color:#4dffae;
-    background:rgba(77,255,174,.08);
-    border:1px solid rgba(77,255,174,.25);
-
-    font-weight:bold;
-}
-
-.live-dot{
-    width:9px;
-    height:9px;
-    background:#4dffae;
-    border-radius:50%;
-    box-shadow:0 0 12px #4dffae;
-}
-
-/* MAIN */
-
-main{
-    max-width:1450px;
-    margin:auto;
-    padding:28px;
-}
-
-/* STATUS */
-
-.status{
-    padding:25px;
-    margin-bottom:22px;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(18,54,81,.9),
-            rgba(9,29,48,.9)
-        );
-
-    border:1px solid rgba(255,255,255,.08);
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    gap:20px;
-    flex-wrap:wrap;
-
-    box-shadow:0 15px 45px rgba(0,0,0,.25);
-}
-
-.status-label{
-    color:#7e9ab0;
-    font-size:13px;
-    margin-bottom:7px;
-}
-
-#status{
-    font-size:30px;
-    font-weight:bold;
-}
-
-.normal{
-    color:#43e59a;
-}
-
-.warning{
-    color:#ffd166;
-}
-
-.danger{
-    color:#ff9f43;
-}
-
-.critical{
-    color:#ff5757;
-}
-
-.update{
-    color:#7892a8;
-    font-size:13px;
-}
-
-/* FORECAST */
-
-.forecast{
-    margin-bottom:25px;
-
-    padding:25px;
-
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(13,39,62,.95),
-            rgba(9,25,42,.95)
-        );
-
-    border:1px solid rgba(255,255,255,.08);
-
-    box-shadow:0 15px 45px rgba(0,0,0,.2);
-}
-
-.forecast-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:20px;
-}
-
-.forecast-title{
-    font-size:19px;
-    font-weight:bold;
-}
-
-.forecast-location{
-    color:#7895aa;
-    font-size:12px;
-}
-
-.forecast-main{
-    display:grid;
-    grid-template-columns:1.3fr 1fr;
-    gap:20px;
-}
-
-.rain-prediction{
-
-    padding:25px;
-
-    border-radius:18px;
-
-    background:rgba(0,0,0,.18);
-
-    border:1px solid rgba(255,255,255,.05);
-}
-
-.rain-icon{
-    font-size:42px;
-}
-
-.rain-result{
-    font-size:25px;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.rain-detail{
-    color:#8ca7bb;
-    margin-top:8px;
-    font-size:13px;
-}
-
-.forecast-grid{
-    display:grid;
-    grid-template-columns:repeat(6,1fr);
-    gap:10px;
-}
-
-.hour{
-    padding:15px 8px;
-
-    text-align:center;
-
-    border-radius:14px;
-
-    background:#0a1b2c;
-
-    border:1px solid rgba(255,255,255,.05);
-}
-
-.hour-time{
-    font-size:11px;
-    color:#7792a8;
-}
-
-.hour-icon{
-    font-size:25px;
-    margin:10px 0;
-}
-
-.hour-rain{
-    font-weight:bold;
-}
-
-.hour-prob{
-    font-size:11px;
-    color:#7e9bb0;
-    margin-top:4px;
-}
-
-/* CARDS */
-
-.cards{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:18px;
-    margin-bottom:25px;
-}
-
-.card{
-    position:relative;
-
-    padding:23px;
-
-    border-radius:20px;
-
-    background:rgba(13,30,47,.92);
-
-    border:1px solid rgba(255,255,255,.07);
-
-    overflow:hidden;
-
-    transition:.25s;
-
-    box-shadow:0 10px 35px rgba(0,0,0,.18);
-}
-
-.card:hover{
-    transform:translateY(-5px);
-    border-color:rgba(0,190,255,.3);
-}
-
-.card-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    color:#8ca5ba;
-    font-size:14px;
-}
-
-.card-icon{
-    font-size:27px;
-}
-
-.value{
-    margin-top:17px;
-
-    font-size:35px;
-    font-weight:bold;
-}
-
-.unit{
-    font-size:14px;
-    color:#7891a5;
-    font-weight:normal;
-}
-
-.description{
-    margin-top:7px;
-
-    color:#617b91;
-    font-size:12px;
-}
-
-/* WATER */
-
-.water-card{
-    grid-column:span 3;
-}
-
-.water-bar{
-    height:12px;
-    margin-top:20px;
-
-    background:#142b40;
-
-    border-radius:20px;
-
-    overflow:hidden;
-}
-
-#waterProgress{
-    height:100%;
-    width:0%;
-
-    border-radius:20px;
-
-    background:linear-gradient(
-        90deg,
-        #00d4ff,
-        #006eff
-    );
-
-    transition:.5s;
-}
-
-/* CHART */
-
-.chart-box{
-
-    padding:25px;
-
-    border-radius:22px;
-
-    background:#0c1d2e;
-
-    border:1px solid rgba(255,255,255,.07);
-
-    margin-bottom:25px;
-}
-
-.chart-title{
-    font-size:18px;
-    font-weight:bold;
-    margin-bottom:20px;
-}
-
-.chart-container{
-    height:330px;
-}
-
-/* FOOTER */
-
-footer{
-    text-align:center;
-
-    padding:25px;
-
-    color:#587084;
-
-    font-size:12px;
-}
-
-/* MOBILE */
-
-@media(max-width:950px){
-
-    .forecast-main{
-        grid-template-columns:1fr;
-    }
-
-    .cards{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .water-card{
-        grid-column:span 2;
-    }
-
-    .forecast-grid{
-        grid-template-columns:repeat(3,1fr);
-    }
-}
-
-@media(max-width:600px){
-
-    header{
-        padding:18px;
-    }
-
-    main{
-        padding:15px;
-    }
-
-    .cards{
-        grid-template-columns:1fr;
-    }
-
-    .water-card{
-        grid-column:span 1;
-    }
-
-    .forecast-grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
-    .logo h1{
-        font-size:18px;
-    }
-
-    #status{
-        font-size:24px;
-    }
-}
-
+:root{--bg:#06101c;--sky:linear-gradient(180deg,#0b2238,#07131f);--panel:rgba(12,26,43,.78);--hero:linear-gradient(135deg,#0e2c47,#0a1b2e);--track:#13293f;--line:rgba(255,255,255,.09);--tx:#eaf2fa;--mut:#9ab2c8;--acc:#3cc8ff;--ok:#3ddc97;--warn:#ffd166;--hi:#ff9f43;--crit:#ff5c5c}
+body[data-wx=sunny]{--sky:linear-gradient(180deg,#4db8f5 0%,#a9e0ff 40%,#eaf7ff 100%);--panel:rgba(255,255,255,.76);--hero:linear-gradient(135deg,#fff3c4,#ffffffdd);--track:#cfe6f5;--line:rgba(10,60,100,.13);--tx:#0b2a42;--mut:#48677f;--acc:#0a7fd0;--ok:#0f9d63;--warn:#b7791f;--hi:#d9730d;--crit:#d63a3a}
+body[data-wx=drizzle]{--sky:linear-gradient(180deg,#3d5a73,#1d3347 60%,#13222f);--panel:rgba(18,36,52,.74);--hero:linear-gradient(135deg,#2a4a63,#17293a)}
+body[data-wx=rain]{--sky:linear-gradient(180deg,#1b3550,#0d1f33 60%,#081420)}
+body[data-wx=storm]{--sky:linear-gradient(180deg,#1c1830,#0e1226 60%,#070a16);--hero:linear-gradient(135deg,#2a2150,#120f26);--acc:#b79cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"IBM Plex Sans Thai",Arial,sans-serif;background:var(--sky) fixed,var(--bg);color:var(--tx);min-height:100vh;transition:color .6s}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.wx{font-size:14px;font-weight:600;padding:7px 14px;border-radius:99px;background:var(--panel);border:1px solid var(--line)}
+.hr{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.demo{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--mut)}
+.demo button{font:inherit;color:var(--tx);background:var(--panel);border:1px solid var(--line);padding:6px 12px;border-radius:99px;cursor:pointer}
+.demo button.on{border-color:var(--acc);color:var(--acc)}
+.demo button:focus-visible{outline:2px solid var(--acc)}
+header,main,footer{position:relative;z-index:1}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 28px;border-bottom:1px solid var(--line)}
+header h1{font-size:20px;font-weight:700}
+header p{color:var(--mut);font-size:13px;margin-top:2px}
+.live{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ok);border:1px solid #3ddc9744;padding:7px 14px;border-radius:99px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.3}}
+main{max-width:1280px;margin:auto;padding:22px;display:grid;gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lbl{color:var(--mut);font-size:13px}
+/* Hero */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.predict{position:relative;overflow:hidden;background:var(--hero)}
+.predict .big{display:flex;align-items:baseline;gap:10px;margin:14px 0 6px;flex-wrap:wrap}
+.predict .eta{font-size:64px;font-weight:700;line-height:1;color:var(--acc)}
+.predict .eta.stop{color:var(--ok)}.predict .eta.none{color:var(--warn)}.predict .eta.wait{color:var(--mut)}
+.predict .u{font-size:20px;color:var(--mut)}
+.msg{font-size:15px;line-height:1.6;max-width:520px}
+.meta{display:flex;gap:22px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.meta b{display:block;font-size:17px;font-weight:600;margin-top:2px}
+.conf{height:6px;background:var(--track);border-radius:9px;overflow:hidden;width:120px;margin-top:8px}
+.conf i{display:block;height:100%;width:0;background:var(--acc);transition:width .6s}
+.rain-bg{position:absolute;right:-10px;top:-10px;font-size:130px;opacity:.07;pointer-events:none}
+.status{display:flex;flex-direction:column;justify-content:space-between}
+#status{font-size:30px;font-weight:700;margin:8px 0}
+.s-ok{color:var(--ok)}.s-warn{color:var(--warn)}.s-hi{color:var(--hi)}.s-crit{color:var(--crit)}
+.level{display:flex;align-items:baseline;gap:6px}
+.level b{font-size:44px;font-weight:700}
+.bar{height:12px;border-radius:9px;background:var(--track);position:relative;overflow:hidden;margin-top:14px}
+.bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#21d4fd,#2f6bff);transition:width .6s}
+.ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-top:6px}
+#lastUpdate{font-size:12px;color:var(--mut);margin-top:14px}
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.card .v{font-size:28px;font-weight:600;margin-top:10px}
+.card .v small{font-size:13px;color:var(--mut);font-weight:400;margin-left:4px}
+.card .ic{font-size:20px;margin-right:6px}
+.chart-wrap{height:320px;margin-top:12px}
+footer{text-align:center;color:#5d758b;font-size:12px;padding:18px}
+@media(max-width:1000px){.hero{grid-template-columns:1fr}.cards{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){header{padding:14px 16px}main{padding:14px}.cards{grid-template-columns:repeat(2,1fr)}.predict .eta{font-size:50px}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}}
 </style>
 </head>
-
-<body>
-
+<body data-wx="sunny">
+<canvas id="fx"></canvas>
 <header>
-
-    <div class="logo">
-
-        <div class="logo-icon">
-            🌊
-        </div>
-
-        <div>
-
-            <h1>SMART FLOOD MONITORING</h1>
-
-            <p>
-                ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="live">
-
-        <span class="live-dot"></span>
-
-        LIVE
-
-    </div>
-
+  <div><h1>🌊 Smart Flood Monitoring</h1><p>ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ</p></div>
+  <div class="hr"><div class="wx" id="wx">☀️ ฟ้าสดใส</div><div class="live"><span class="dot"></span>LIVE</div></div>
 </header>
 
-
 <main>
-
-
-<!-- STATUS -->
-
-<section class="status">
-
-    <div>
-
-        <div class="status-label">
-            สถานะระดับน้ำ
-        </div>
-
-        <div id="status">
-            กำลังโหลด...
-        </div>
-
+  <div class="demo" id="demo">ดูตัวอย่างธีม:
+    <button data-k="auto" class="on">อัตโนมัติ</button><button data-k="sunny">☀️ ฟ้าสดใส</button><button data-k="drizzle">🌦️ ฝนปรอย</button><button data-k="rain">🌧️ ฝนตก</button><button data-k="storm">⛈️ พายุฝน</button>
+  </div>
+  <section class="hero">
+    <div class="panel predict">
+      <div class="rain-bg">🌧️</div>
+      <div class="lbl">คาดการณ์ฝนหยุด</div>
+      <div class="big"><span id="eta" class="eta wait">--</span><span id="etaUnit" class="u"></span></div>
+      <p id="etaMsg" class="msg">กำลังรวบรวมข้อมูลฝนย้อนหลัง...</p>
+      <div class="meta">
+        <div><span class="lbl">คาดว่าฝนหยุดประมาณ</span><b id="etaClock">--</b></div>
+        <div><span class="lbl">แนวโน้มฝน</span><b id="trend">--</b></div>
+        <div><span class="lbl">ความเชื่อมั่น</span><b id="confTxt">--</b><div class="conf"><i id="confBar"></i></div></div>
+      </div>
     </div>
 
-    <div class="update">
-
-        Last Update:
-        <span id="lastUpdate">-</span>
-
+    <div class="panel status">
+      <div>
+        <div class="lbl">สถานะระดับน้ำ</div>
+        <div id="status" class="s-ok">กำลังโหลด...</div>
+        <div class="level"><b id="water_level">--</b><span class="lbl">cm</span></div>
+        <div class="bar"><i id="waterProgress"></i></div>
+        <div class="ticks"><span>0</span><span>30</span><span>60</span><span>80</span><span>100 cm</span></div>
+      </div>
+      <div id="lastUpdate">อัปเดตล่าสุด: -</div>
     </div>
-
-</section>
-
-
-
-<!-- RAIN FORECAST -->
-
-<section class="forecast">
-
-    <div class="forecast-header">
-
-        <div class="forecast-title">
-            🌧️ คาดการณ์ฝนล่วงหน้า
-        </div>
-
-        <div class="forecast-location">
-            Phuket
-        </div>
-
-    </div>
-
-
-    <div class="forecast-main">
-
-
-        <div class="rain-prediction">
-
-            <div class="rain-icon" id="rainIcon">
-                🌦️
-            </div>
-
-            <div class="rain-result" id="rainResult">
-                กำลังตรวจสอบ...
-            </div>
-
-            <div class="rain-detail" id="rainDetail">
-                กำลังโหลดข้อมูลพยากรณ์อากาศ
-            </div>
-
-        </div>
-
-
-        <div class="forecast-grid" id="forecastGrid">
-
-        </div>
-
-
-    </div>
-
-</section>
-
-
-
-<!-- SENSOR CARDS -->
-
-<section class="cards">
-
-
-    <!-- WATER LEVEL -->
-
-    <div class="card water-card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                🌊
-            </span>
-
-            ระดับน้ำ
-
-        </div>
-
-        <div class="value">
-
-            <span id="water_level">
-                --
-            </span>
-
-            <span class="unit">
-                cm
-            </span>
-
-        </div>
-
-        <div class="description">
-            Water Level
-        </div>
-
-        <div class="water-bar">
-
-            <div id="waterProgress"></div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- RAIN -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                🌧️
-            </span>
-
-            ปริมาณฝน
-
-        </div>
-
-        <div class="value">
-
-            <span id="rainfall">
-                --
-            </span>
-
-            <span class="unit">
-                mm/h
-            </span>
-
-        </div>
-
-        <div class="description">
-            Rainfall Intensity
-        </div>
-
-    </div>
-
-
-
-    <!-- WATER RATE -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                📈
-            </span>
-
-            อัตราเพิ่มระดับน้ำ
-
-        </div>
-
-        <div class="value">
-
-            <span id="water_rate">
-                --
-            </span>
-
-            <span class="unit">
-                cm/min
-            </span>
-
-        </div>
-
-        <div class="description">
-            Water Level Rise Rate
-        </div>
-
-    </div>
-
-
-
-    <!-- TEMPERATURE -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                🌡️
-            </span>
-
-            อุณหภูมิ
-
-        </div>
-
-        <div class="value">
-
-            <span id="temperature">
-                --
-            </span>
-
-            <span class="unit">
-                °C
-            </span>
-
-        </div>
-
-        <div class="description">
-            Temperature
-        </div>
-
-    </div>
-
-
-
-    <!-- HUMIDITY -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                💧
-            </span>
-
-            ความชื้น
-
-        </div>
-
-        <div class="value">
-
-            <span id="humidity">
-                --
-            </span>
-
-            <span class="unit">
-                %
-            </span>
-
-        </div>
-
-        <div class="description">
-            Relative Humidity
-        </div>
-
-    </div>
-
-
-
-    <!-- DRAIN -->
-
-    <div class="card">
-
-        <div class="card-title">
-
-            <span class="card-icon">
-                🚰
-            </span>
-
-            ระบบระบายน้ำ
-
-        </div>
-
-        <div
-            class="value"
-            id="drain_status">
-
-            --
-
-        </div>
-
-        <div class="description">
-            Drainage System
-        </div>
-
-    </div>
-
-
-</section>
-
-
-
-<!-- CHART -->
-
-<section class="chart-box">
-
-    <div class="chart-title">
-        📊 ประวัติระดับน้ำแบบ Real-Time
-    </div>
-
-    <div class="chart-container">
-
-        <canvas id="waterChart"></canvas>
-
-    </div>
-
-</section>
-
-
+  </section>
+
+  <section class="cards">
+    <div class="panel card"><div class="lbl"><span class="ic">🌧️</span>ปริมาณฝน</div><div class="v"><span id="rainfall">--</span><small>mm/h</small></div></div>
+    <div class="panel card"><div class="lbl"><span class="ic">📈</span>น้ำเพิ่มขึ้น</div><div class="v"><span id="water_rate">--</span><small>cm/min</small></div></div>
+    <div class="panel card"><div class="lbl"><span class="ic">🌡️</span>อุณหภูมิ</div><div class="v"><span id="temperature">--</span><small>°C</small></div></div>
+    <div class="panel card"><div class="lbl"><span class="ic">💧</span>ความชื้น</div><div class="v"><span id="humidity">--</span><small>%</small></div></div>
+    <div class="panel card"><div class="lbl"><span class="ic">🚰</span>ระบบระบายน้ำ</div><div class="v" id="drain_status">--</div></div>
+  </section>
+
+  <section class="panel">
+    <div style="font-weight:600">📊 ประวัติระดับน้ำและปริมาณฝน</div>
+    <div class="chart-wrap"><canvas id="waterChart"></canvas></div>
+  </section>
 </main>
 
-
-<footer>
-
-Smart Flood Prevention & Monitoring System
-
-<br>
-
-ESP32 • ESPHome • Firebase • Weather Forecast
-
-</footer>
-
-
+<footer>Smart Flood Prevention &amp; Monitoring System · ESP32 · ESPHome · Firebase</footer>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+const app = initializeApp({ databaseURL: "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/" });
+const db = getDatabase(app);
+const $ = id => document.getElementById(id);
 
-/* =========================================
-   FIREBASE
-========================================= */
-
-import {
-    initializeApp
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-
-import {
-    getDatabase,
-    ref,
-    onValue,
-    query,
-    limitToLast
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-
-const firebaseConfig = {
-
-    databaseURL:
-    "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
-
-};
-
-
-const app =
-    initializeApp(firebaseConfig);
-
-const db =
-    getDatabase(app);
-
-
-
-/* =========================================
-   ELEMENTS
-========================================= */
-
-const waterLevel =
-    document.getElementById("water_level");
-
-const rainfall =
-    document.getElementById("rainfall");
-
-const waterRate =
-    document.getElementById("water_rate");
-
-const temperature =
-    document.getElementById("temperature");
-
-const humidity =
-    document.getElementById("humidity");
-
-const drainStatus =
-    document.getElementById("drain_status");
-
-const status =
-    document.getElementById("status");
-
-const lastUpdate =
-    document.getElementById("lastUpdate");
-
-const waterProgress =
-    document.getElementById("waterProgress");
-
-
-
-/* =========================================
-   WATER STATUS
-========================================= */
-
-function updateStatus(level){
-
-    status.className = "";
-
-    if(level < 30){
-
-        status.textContent =
-            "🟢 NORMAL";
-
-        status.classList.add("normal");
-
-    }
-
-    else if(level < 60){
-
-        status.textContent =
-            "🟡 WARNING";
-
-        status.classList.add("warning");
-
-    }
-
-    else if(level < 80){
-
-        status.textContent =
-            "🟠 HIGH RISK";
-
-        status.classList.add("danger");
-
-    }
-
-    else{
-
-        status.textContent =
-            "🔴 CRITICAL";
-
-        status.classList.add("critical");
-
-    }
-
+/* ---------- Status ---------- */
+function updateStatus(l){
+  const s = $("status");
+  const [t,c] = l<30?["🟢 ปกติ","s-ok"]:l<60?["🟡 เฝ้าระวัง","s-warn"]:l<80?["🟠 เสี่ยงสูง","s-hi"]:["🔴 วิกฤต","s-crit"];
+  s.textContent = t; s.className = c;
 }
 
+/* ---------- Latest data ---------- */
+let latestRain = null;
+onValue(ref(db,"latest"), snap => {
+  const d = snap.val(); if(!d) return;
+  if(d.water_level!==undefined){
+    const l = Number(d.water_level);
+    $("water_level").textContent = l.toFixed(1);
+    updateStatus(l);
+    $("waterProgress").style.width = Math.max(0,Math.min(100,l))+"%";
+  }
+  if(d.rainfall!==undefined){ latestRain = Number(d.rainfall); $("rainfall").textContent = latestRain.toFixed(1); applyWeather(); }
+  if(d.water_rate!==undefined) $("water_rate").textContent = Number(d.water_rate).toFixed(2);
+  if(d.temperature!==undefined) $("temperature").textContent = Number(d.temperature).toFixed(1);
+  if(d.humidity!==undefined) $("humidity").textContent = Number(d.humidity).toFixed(1);
+  if(d.drain_status!==undefined){
+    const on = Number(d.drain_status)===1, e = $("drain_status");
+    e.textContent = on?"ทำงาน":"หยุด"; e.style.color = on?"var(--ok)":"var(--crit)";
+  }
+  $("lastUpdate").textContent = "อัปเดตล่าสุด: "+new Date().toLocaleTimeString("th-TH");
+});
 
-
-/* =========================================
-   FIREBASE LATEST
-========================================= */
-
-const latestRef =
-    ref(db,"latest");
-
-
-onValue(latestRef,(snapshot)=>{
-
-    const data =
-        snapshot.val();
-
-    if(!data){
-
-        console.log(
-            "ไม่พบข้อมูล latest"
-        );
-
-        return;
-
-    }
-
-
-    console.log(
-        "Firebase:",
-        data
-    );
-
-
-    /* WATER LEVEL */
-
-    if(data.water_level !== undefined){
-
-        const level =
-            Number(data.water_level);
-
-        waterLevel.textContent =
-            level.toFixed(1);
-
-        updateStatus(level);
-
-
-        let progress =
-            (level / 100) * 100;
-
-        progress =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    progress
-                )
-            );
-
-        waterProgress.style.width =
-            progress + "%";
-
-    }
-
-
-    /* RAIN */
-
-    if(data.rainfall !== undefined){
-
-        rainfall.textContent =
-            Number(data.rainfall)
-            .toFixed(1);
-
-    }
-
-
-    /* WATER RATE */
-
-    if(data.water_rate !== undefined){
-
-        waterRate.textContent =
-            Number(data.water_rate)
-            .toFixed(2);
-
-    }
-
-
-    /* TEMPERATURE */
-
-    if(data.temperature !== undefined){
-
-        temperature.textContent =
-            Number(data.temperature)
-            .toFixed(1);
-
-    }
-
-
-    /* HUMIDITY */
-
-    if(data.humidity !== undefined){
-
-        humidity.textContent =
-            Number(data.humidity)
-            .toFixed(1);
-
-    }
-
-
-    /* DRAIN */
-
-    if(data.drain_status !== undefined){
-
-        if(
-            Number(data.drain_status) === 1
-        ){
-
-            drainStatus.textContent =
-                "ON";
-
-            drainStatus.style.color =
-                "#43e59a";
-
-        }
-
-        else{
-
-            drainStatus.textContent =
-                "OFF";
-
-            drainStatus.style.color =
-                "#ff6b6b";
-
-        }
-
-    }
-
-
-    lastUpdate.textContent =
-        new Date()
-        .toLocaleTimeString(
-            "th-TH"
-        );
-
+/* ---------- Chart ---------- */
+const chart = new Chart($("waterChart"), {
+  type:"line",
+  data:{labels:[],datasets:[
+    {label:"ระดับน้ำ (cm)",data:[],yAxisID:"y",borderColor:"#3cc8ff",backgroundColor:"rgba(60,200,255,.12)",fill:true,tension:.35,borderWidth:2.5,pointRadius:0},
+    {label:"ฝน (mm/h)",data:[],yAxisID:"y1",borderColor:"#ffd166",tension:.35,borderWidth:2,pointRadius:0,borderDash:[5,4]}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},
+    plugins:{legend:{labels:{color:"#cfe0ee"}}},
+    scales:{
+      x:{ticks:{color:"#8aa3ba",maxTicksLimit:8},grid:{color:"rgba(255,255,255,.04)"}},
+      y:{beginAtZero:true,ticks:{color:"#8aa3ba"},grid:{color:"rgba(255,255,255,.05)"}},
+      y1:{position:"right",beginAtZero:true,ticks:{color:"#ffd166"},grid:{drawOnChartArea:false}}
+    }}
 });
 
 
-
-/* =========================================
-   WATER LEVEL CHART
-========================================= */
-
-const ctx =
-    document.getElementById(
-        "waterChart"
-    );
-
-
-const waterChart =
-    new Chart(
-        ctx,
-        {
-
-            type:"line",
-
-            data:{
-
-                labels:[],
-
-                datasets:[{
-
-                    label:
-                    "Water Level (cm)",
-
-                    data:[],
-
-                    tension:.35,
-
-                    fill:true,
-
-                    borderWidth:3,
-
-                    pointRadius:3
-
-                }]
-
-            },
-
-            options:{
-
-                responsive:true,
-
-                maintainAspectRatio:false,
-
-                plugins:{
-
-                    legend:{
-
-                        labels:{
-
-                            color:"#fff"
-
-                        }
-
-                    }
-
-                },
-
-                scales:{
-
-                    x:{
-
-                        ticks:{
-                            color:"#7892a8"
-                        },
-
-                        grid:{
-                            color:
-                            "rgba(255,255,255,.05)"
-                        }
-
-                    },
-
-                    y:{
-
-                        beginAtZero:true,
-
-                        ticks:{
-                            color:"#7892a8"
-                        },
-
-                        grid:{
-                            color:
-                            "rgba(255,255,255,.05)"
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-
-
-/* =========================================
-   FIREBASE HISTORY
-========================================= */
-
-const historyRef =
-    query(
-        ref(db,"history"),
-        limitToLast(30)
-    );
-
-
-onValue(
-    historyRef,
-    (snapshot)=>{
-
-        const data =
-            snapshot.val();
-
-        if(!data)
-            return;
-
-
-        const entries =
-            Object.values(data);
-
-
-        entries.sort(
-            (a,b)=>
-                Number(a.timestamp || 0)
-                -
-                Number(b.timestamp || 0)
-        );
-
-
-        waterChart.data.labels =
-            [];
-
-        waterChart.data.datasets[0].data =
-            [];
-
-
-        entries.forEach(item=>{
-
-            const time =
-                item.timestamp
-                ?
-                new Date(
-                    Number(
-                        item.timestamp
-                    )
-                )
-                :
-                new Date();
-
-
-            waterChart.data.labels.push(
-
-                time.toLocaleTimeString(
-                    "th-TH",
-                    {
-                        hour:"2-digit",
-                        minute:"2-digit"
-                    }
-                )
-
-            );
-
-
-            waterChart
-                .data
-                .datasets[0]
-                .data
-                .push(
-                    Number(
-                        item.water_level || 0
-                    )
-                );
-
-        });
-
-
-        waterChart.update();
-
-    }
-);
-
-
-
-/* =========================================
-   WEATHER FORECAST
-========================================= */
-
-/*
-   เปลี่ยนพิกัดตรงนี้ได้
-   ค่าเริ่มต้น = ภูเก็ต
-*/
-
-const LATITUDE =
-    7.8804;
-
-const LONGITUDE =
-    98.3923;
-
-
-async function loadWeather(){
-
-    try{
-
-        const url =
-        `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=precipitation_probability,precipitation,rain,weather_code&forecast_hours=12&timezone=Asia%2FBangkok`;
-
-
-        const response =
-            await fetch(url);
-
-
-        const weather =
-            await response.json();
-
-
-        const times =
-            weather.hourly.time;
-
-        const probabilities =
-            weather.hourly
-            .precipitation_probability;
-
-        const precipitation =
-            weather.hourly
-            .precipitation;
-
-        const rain =
-            weather.hourly.rain;
-
-
-        /* =========================
-           FIND WHEN RAIN STOPS
-        ========================= */
-
-        let stopIndex =
-            -1;
-
-
-        for(
-            let i=0;
-            i<Math.min(
-                12,
-                times.length
-            );
-            i++
-        ){
-
-            /*
-              ถือว่าฝนมีแนวโน้มจะหยุด
-              เมื่อโอกาสฝน <= 30%
-              และปริมาณฝน < 0.2 mm
-            */
-
-            if(
-                probabilities[i] <= 30 &&
-                rain[i] < 0.2
-            ){
-
-                stopIndex = i;
-
-                break;
-
-            }
-
-        }
-
-
-        const rainResult =
-            document.getElementById(
-                "rainResult"
-            );
-
-        const rainDetail =
-            document.getElementById(
-                "rainDetail"
-            );
-
-        const rainIcon =
-            document.getElementById(
-                "rainIcon"
-            );
+/* ---------- Weather theme + background effects ---------- */
+const WX = {sunny:["☀️ ฟ้าสดใส",0],drizzle:["🌦️ ฝนปรอย",70],rain:["🌧️ ฝนตก",170],storm:["⛈️ พายุฝน",340]};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cv = $("fx"), cx = cv.getContext("2d");
+let W, H, drops = [], wk = "sunny", flash = 0, demoKey = "auto";
+function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; setDrops(); }
+function setDrops(){ drops = Array.from({length:WX[wk][1]}, () => ({x:Math.random()*W, y:Math.random()*H, l:10+Math.random()*14, v:9+Math.random()*9})); }
+addEventListener("resize", resize);
+
+function frame(ts){
+  cx.clearRect(0,0,W,H);
+  if(wk==="sunny"){
+    const sx=W*.86, sy=110, a=ts/6000;
+    cx.save(); cx.translate(sx,sy);
+    cx.strokeStyle="rgba(255,214,90,.55)"; cx.lineWidth=4; cx.lineCap="round";
+    for(let i=0;i<14;i++){ const r=a+i*Math.PI/7; cx.beginPath(); cx.moveTo(Math.cos(r)*62,Math.sin(r)*62); cx.lineTo(Math.cos(r)*88,Math.sin(r)*88); cx.stroke(); }
+    const g=cx.createRadialGradient(0,0,10,0,0,240); g.addColorStop(0,"rgba(255,235,150,.9)"); g.addColorStop(.25,"rgba(255,220,100,.35)"); g.addColorStop(1,"rgba(255,220,100,0)");
+    cx.fillStyle=g; cx.beginPath(); cx.arc(0,0,240,0,7); cx.fill();
+    cx.fillStyle="#ffd54a"; cx.beginPath(); cx.arc(0,0,48,0,7); cx.fill(); cx.restore();
+    cx.fillStyle="rgba(255,255,255,.7)";
+    [[0,160,1],[.4,260,.7],[.75,90,1.2]].forEach(([o,y,sc],i)=>{
+      const x=((ts*.012*sc+o*(W+400))%(W+400))-200;
+      [[0,0,34],[34,-12,44],[78,0,34],[40,10,40]].forEach(([dx,dy,r])=>{ cx.beginPath(); cx.arc(x+dx*sc,y+dy*sc,r*sc,0,7); cx.fill(); });
+    });
+  } else {
+    const k = wk==="storm"?1.5:1;
+    cx.strokeStyle = wk==="drizzle"?"rgba(190,220,245,.35)":"rgba(170,210,255,.5)"; cx.lineWidth = wk==="storm"?1.6:1.2;
+    cx.beginPath();
+    for(const d of drops){ cx.moveTo(d.x,d.y); cx.lineTo(d.x-d.l*.25,d.y+d.l); d.y+=d.v*k; d.x-=2*k; if(d.y>H){d.y=-20; d.x=Math.random()*(W+100);} }
+    cx.stroke();
+    if(wk==="storm"){ if(flash<=0 && Math.random()<.004) flash=.5; if(flash>0){ cx.fillStyle="rgba(220,210,255,"+flash+")"; cx.fillRect(0,0,W,H); flash-=.03; } }
+  }
+  if(!reduce) requestAnimationFrame(frame);
+}
+
+function weatherKey(){
+  if(demoKey!=="auto") return demoKey;
+  const r = latestRain;
+  return r==null||r<0.2 ? "sunny" : r<2.5 ? "drizzle" : r<10 ? "rain" : "storm";
+}
+function applyWeather(){
+  const k = weatherKey(); if(k===wk && document.body.dataset.wx===k) return;
+  wk = k; document.body.dataset.wx = k; $("wx").textContent = WX[k][0]; setDrops();
+  const c = k==="sunny" ? ["#0b2a42","rgba(10,60,100,.12)"] : ["#cfe0ee","rgba(255,255,255,.06)"];
+  chart.options.plugins.legend.labels.color = c[0];
+  ["x","y"].forEach(a => { chart.options.scales[a].ticks.color = k==="sunny"?"#48677f":"#8aa3ba"; chart.options.scales[a].grid.color = c[1]; });
+  chart.update(); if(reduce) frame(0);
+}
+$("demo").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  demoKey = b.dataset.k;
+  document.querySelectorAll("#demo button").forEach(x => x.classList.toggle("on", x===b));
+  applyWeather();
+});
+resize(); applyWeather(); requestAnimationFrame(frame);
+
+/* ---------- Rain-stop prediction ----------
+   Fit exponential decay r(t)=a·e^(b·t) to recent rainfall (linear regression on ln r).
+   If b<0 the rain is fading; time until r drops below STOP_RATE = ln(r_now/STOP_RATE)/(-b). */
+const STOP_RATE = 0.2; // mm/h — below this we call it "stopped"
+const WINDOW_H = 3; // use last 3 hours of history
+const MIN_SPAN_MIN = 10; // need at least 10 minutes of data
+const MAX_ETA_H = 12;
+
+function predictRain(pts){
+  const now = pts.length ? pts[pts.length-1].t : Date.now();
+  const rNow = latestRain ?? (pts.length ? pts[pts.length-1].r : null);
+  if(rNow===null) return {state:"wait"};
+  if(rNow < STOP_RATE) return {state:"stopped"};
+
+  const win = pts.filter(p => now - p.t <= WINDOW_H*3600e3);
+  if(win.length < 5 || (win[win.length-1].t - win[0].t) < MIN_SPAN_MIN*60e3) return {state:"wait"};
+
+  // Regression on ln(rain) vs hours
+  const x = win.map(p => (p.t - now)/3600e3);
+  const y = win.map(p => Math.log(Math.max(p.r, 0.05)));
+  const n = x.length, mx = x.reduce((a,b)=>a+b)/n, my = y.reduce((a,b)=>a+b)/n;
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){ sxy+=(x[i]-mx)*(y[i]-my); sxx+=(x[i]-mx)**2; syy+=(y[i]-my)**2; }
+  if(sxx===0) return {state:"wait"};
+  const b = sxy/sxx, a = my - b*mx;
+  const r2 = syy===0 ? 0 : (sxy*sxy)/(sxx*syy);
+  const fitNow = Math.exp(a); // fitted intensity at t = now
+  const rate = Math.max(fitNow, rNow*0.5); // blend to avoid wild fits
+
+  let conf = Math.min(1, r2) * Math.min(1, n/12);
+  if(b > -0.1) return {state:"none", slope:b, conf};
+  const hrs = Math.log(rate/STOP_RATE) / (-b);
+  if(!isFinite(hrs) || hrs<0) return {state:"wait"};
+  return {state:"eta", hrs:Math.min(hrs,MAX_ETA_H), capped:hrs>MAX_ETA_H, slope:b, conf};
+}
+
+function renderPrediction(p){
+  const eta=$("eta"), u=$("etaUnit"), msg=$("etaMsg"), clock=$("etaClock"), tr=$("trend");
+  eta.className="eta"; u.textContent="";
+  $("confBar").style.width = ((p.conf||0)*100)+"%";
+  $("confTxt").textContent = p.conf==null?"--":p.conf>.66?"สูง":p.conf>.33?"ปานกลาง":"ต่ำ";
+  if(p.state==="stopped"){
+    eta.textContent="หยุดแล้ว"; eta.classList.add("stop");
+    msg.textContent="ปริมาณฝนต่ำกว่า "+STOP_RATE+" mm/h ถือว่าฝนหยุดหรือเหลือเพียงละอองฝน";
+    clock.textContent="ตอนนี้"; tr.textContent="ฝนหยุด"; $("confTxt").textContent="--"; $("confBar").style.width="0";
+  } else if(p.state==="eta"){
+    const h=p.hrs;
+    if(h<1){ eta.textContent=Math.max(5,Math.round(h*60/5)*5); u.textContent="นาที"; }
+    else { eta.textContent=(p.capped?">":"")+h.toFixed(1); u.textContent="ชั่วโมง"; }
+    msg.textContent="ฝนกำลังเบาลงอย่างต่อเนื่อง คาดว่าจะหยุดภายในเวลาประมาณนี้ (คำนวณจากแนวโน้มฝนย้อนหลัง "+WINDOW_H+" ชม.)";
+    clock.textContent=new Date(Date.now()+h*3600e3).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"})+" น.";
+    tr.textContent="📉 เบาลง";
+  } else if(p.state==="none"){
+    eta.textContent="ยังไม่ซา"; eta.classList.add("none");
+    msg.textContent="ฝนยังคงที่หรือแรงขึ้น ยังประเมินเวลาที่ฝนจะหยุดไม่ได้ ระบบจะคำนวณใหม่ทุกครั้งที่มีข้อมูลเข้า";
+    clock.textContent="--"; tr.textContent=p.slope>0.1?"📈 แรงขึ้น":"➡️ คงที่";
+  } else {
+    eta.textContent="--"; eta.classList.add("wait");
+    msg.textContent="กำลังรวบรวมข้อมูลฝนย้อนหลัง (ต้องมีอย่างน้อย "+MIN_SPAN_MIN+" นาที)";
+    clock.textContent="--"; tr.textContent="--";
+  }
+}
+
+/* ---------- History ---------- */
+onValue(query(ref(db,"history"), limitToLast(200)), snap => {
+  const data = snap.val(); if(!data) return;
+  const rows = Object.values(data).map(i => {
+    let t = Number(i.timestamp||0); if(t && t<1e12) t*=1000; // seconds → ms
+    return {t, w:Number(i.water_level||0), r:i.rainfall===undefined?null:Number(i.rainfall)};
+  }).filter(i=>i.t).sort((a,b)=>a.t-b.t);
+
+  const show = rows.slice(-60);
+  chart.data.labels = show.map(i=>new Date(i.t).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"}));
+  chart.data.datasets[0].data = show.map(i=>i.w);
+  chart.data.datasets[1].data = show.map(i=>i.r);
+  chart.update();
+
+  renderPrediction(predictRain(rows.filter(i=>i.r!==null).map(i=>({t:i.t,r:i.r}))));
+});
+</script>
+</body>
+</html>
