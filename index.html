@@ -1,65 +1,759 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <title>Smart Flood Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Smart Flood Monitoring</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, "Noto Sans Thai", sans-serif;
+    }
+
+    body {
+      background: #07111f;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #0b1d33, #0b3554);
+      padding: 22px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .title-icon {
+      font-size: 42px;
+    }
+
+    .title h1 {
+      font-size: 25px;
+      letter-spacing: 1px;
+    }
+
+    .title p {
+      color: #9fb6cc;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .live {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 255, 150, 0.1);
+      border: 1px solid rgba(0,255,150,0.3);
+      padding: 10px 15px;
+      border-radius: 30px;
+      color: #50f5a4;
+      font-weight: bold;
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background: #50f5a4;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #50f5a4;
+    }
+
+    /* Main */
+    main {
+      max-width: 1400px;
+      margin: auto;
+      padding: 25px;
+    }
+
+    /* Status */
+    .status-box {
+      background: linear-gradient(135deg, #102a42, #0d2236);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+    }
+
+    .status-title {
+      color: #9fb6cc;
+      font-size: 14px;
+      margin-bottom: 7px;
+    }
+
+    #status {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .status-normal {
+      color: #42e695;
+    }
+
+    .status-warning {
+      color: #ffd166;
+    }
+
+    .status-danger {
+      color: #ff9f43;
+    }
+
+    .status-critical {
+      color: #ff5252;
+    }
+
+    #lastUpdate {
+      color: #8ca4ba;
+      font-size: 13px;
+    }
+
+    /* Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #0d1d2e;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: 0.25s;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(80,190,255,0.35);
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      right: -35px;
+      top: -35px;
+      background: rgba(0,180,255,0.08);
+      border-radius: 50%;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #9fb6cc;
+      font-size: 14px;
+    }
+
+    .card-icon {
+      font-size: 28px;
+    }
+
+    .value {
+      margin-top: 18px;
+      font-size: 34px;
+      font-weight: bold;
+    }
+
+    .unit {
+      font-size: 15px;
+      color: #8da5ba;
+      margin-left: 5px;
+      font-weight: normal;
+    }
+
+    .card-description {
+      color: #6f879c;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    /* Water Level */
+    .water-card {
+      grid-column: span 3;
+    }
+
+    .water-bar {
+      margin-top: 18px;
+      width: 100%;
+      height: 14px;
+      background: #152b40;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    #waterProgress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #21d4fd, #2152ff);
+      border-radius: 20px;
+      transition: width 0.5s;
+    }
+
+    /* Chart */
+    .chart-box {
+      background: #0d1d2e;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .chart-container {
+      height: 320px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: #60778c;
+      padding: 20px;
+      font-size: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .water-card {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 18px;
+      }
+
+      main {
+        padding: 15px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .water-card {
+        grid-column: span 1;
+      }
+
+      .title h1 {
+        font-size: 19px;
+      }
+
+      .title-icon {
+        font-size: 32px;
+      }
+
+      .value {
+        font-size: 30px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-    <h1>🌊 Smart Flood Prevention</h1>
+<header>
+  <div class="title">
+    <div class="title-icon">🌊</div>
+    <div>
+      <h1>SMART FLOOD MONITORING</h1>
+      <p>ระบบตรวจสอบและป้องกันน้ำท่วมอัจฉริยะ</p>
+    </div>
+  </div>
 
-    <p>Dashboard กำลังทำงาน</p>
+  <div class="live">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+</header>
 
-    <p id="water">กำลังโหลด...</p>
+<main>
 
-    <script type="module">
+  <!-- Status -->
+  <section class="status-box">
+    <div>
+      <div class="status-title">สถานะระดับน้ำปัจจุบัน</div>
+      <div id="status" class="status-normal">กำลังโหลด...</div>
+    </div>
 
-        import { initializeApp }
-        from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    <div id="lastUpdate">
+      Last Update: -
+    </div>
+  </section>
 
-        import {
-            getDatabase,
-            ref,
-            onValue
+  <!-- Sensor Cards -->
+  <section class="cards">
+
+    <!-- Water Level -->
+    <div class="card water-card">
+      <div class="card-header">
+        <span class="card-icon">🌊</span>
+        <span>ระดับน้ำ</span>
+      </div>
+
+      <div class="value">
+        <span id="water_level">--</span>
+        <span class="unit">cm</span>
+      </div>
+
+      <div class="card-description">
+        Water Level
+      </div>
+
+      <div class="water-bar">
+        <div id="waterProgress"></div>
+      </div>
+    </div>
+
+    <!-- Rainfall -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🌧️</span>
+        <span>ปริมาณฝน</span>
+      </div>
+
+      <div class="value">
+        <span id="rainfall">--</span>
+        <span class="unit">mm/h</span>
+      </div>
+
+      <div class="card-description">
+        Rainfall Intensity
+      </div>
+    </div>
+
+    <!-- Water Rate -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">📈</span>
+        <span>อัตราการเพิ่มระดับน้ำ</span>
+      </div>
+
+      <div class="value">
+        <span id="water_rate">--</span>
+        <span class="unit">cm/min</span>
+      </div>
+
+      <div class="card-description">
+        Water Level Rise Rate
+      </div>
+    </div>
+
+    <!-- Temperature -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🌡️</span>
+        <span>อุณหภูมิ</span>
+      </div>
+
+      <div class="value">
+        <span id="temperature">--</span>
+        <span class="unit">°C</span>
+      </div>
+
+      <div class="card-description">
+        Temperature
+      </div>
+    </div>
+
+    <!-- Humidity -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">💧</span>
+        <span>ความชื้น</span>
+      </div>
+
+      <div class="value">
+        <span id="humidity">--</span>
+        <span class="unit">%</span>
+      </div>
+
+      <div class="card-description">
+        Relative Humidity
+      </div>
+    </div>
+
+    <!-- Drain Status -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-icon">🚰</span>
+        <span>ระบบระบายน้ำ</span>
+      </div>
+
+      <div class="value" id="drain_status">
+        --
+      </div>
+
+      <div class="card-description">
+        Drainage System
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Chart -->
+  <section class="chart-box">
+    <div class="chart-title">
+      📊 ประวัติระดับน้ำแบบ Real-Time
+    </div>
+
+    <div class="chart-container">
+      <canvas id="waterChart"></canvas>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Smart Flood Prevention & Monitoring System
+  <br>
+  ESP32 • ESPHome • Firebase • GitHub Pages
+</footer>
+
+
+<!-- Firebase -->
+<script type="module">
+
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+  import {
+    getDatabase,
+    ref,
+    onValue,
+    query,
+    limitToLast
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+  /* =========================
+     FIREBASE CONFIG
+  ========================= */
+
+  const firebaseConfig = {
+    databaseURL:
+      "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  };
+
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+
+  /* =========================
+     ELEMENTS
+  ========================= */
+
+  const waterLevel = document.getElementById("water_level");
+  const rainfall = document.getElementById("rainfall");
+  const waterRate = document.getElementById("water_rate");
+  const temperature = document.getElementById("temperature");
+  const humidity = document.getElementById("humidity");
+  const drainStatus = document.getElementById("drain_status");
+
+  const status = document.getElementById("status");
+  const lastUpdate = document.getElementById("lastUpdate");
+  const waterProgress = document.getElementById("waterProgress");
+
+
+  /* =========================
+     STATUS
+  ========================= */
+
+  function updateStatus(level) {
+
+    status.className = "";
+
+    if (level < 30) {
+
+      status.textContent = "🟢 NORMAL";
+      status.classList.add("status-normal");
+
+    } else if (level < 60) {
+
+      status.textContent = "🟡 WARNING";
+      status.classList.add("status-warning");
+
+    } else if (level < 80) {
+
+      status.textContent = "🟠 HIGH RISK";
+      status.classList.add("status-danger");
+
+    } else {
+
+      status.textContent = "🔴 CRITICAL";
+      status.classList.add("status-critical");
+
+    }
+  }
+
+
+  /* =========================
+     REAL-TIME LATEST DATA
+  ========================= */
+
+  const latestRef = ref(db, "latest");
+
+  onValue(latestRef, (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (!data) {
+      console.log("ไม่พบข้อมูล latest");
+      return;
+    }
+
+    console.log("Firebase latest:", data);
+
+
+    /* Water Level */
+
+    if (data.water_level !== undefined) {
+
+      const level = Number(data.water_level);
+
+      waterLevel.textContent = level.toFixed(1);
+
+      updateStatus(level);
+
+      // Maximum display level = 100 cm
+      let progress = (level / 100) * 100;
+
+      if (progress > 100) progress = 100;
+      if (progress < 0) progress = 0;
+
+      waterProgress.style.width = progress + "%";
+    }
+
+
+    /* Rainfall */
+
+    if (data.rainfall !== undefined) {
+      rainfall.textContent =
+        Number(data.rainfall).toFixed(1);
+    }
+
+
+    /* Water Rate */
+
+    if (data.water_rate !== undefined) {
+      waterRate.textContent =
+        Number(data.water_rate).toFixed(2);
+    }
+
+
+    /* Temperature */
+
+    if (data.temperature !== undefined) {
+      temperature.textContent =
+        Number(data.temperature).toFixed(1);
+    }
+
+
+    /* Humidity */
+
+    if (data.humidity !== undefined) {
+      humidity.textContent =
+        Number(data.humidity).toFixed(1);
+    }
+
+
+    /* Drain Status */
+
+    if (data.drain_status !== undefined) {
+
+      if (Number(data.drain_status) === 1) {
+
+        drainStatus.textContent = "ON";
+        drainStatus.style.color = "#42e695";
+
+      } else {
+
+        drainStatus.textContent = "OFF";
+        drainStatus.style.color = "#ff7675";
+
+      }
+    }
+
+
+    /* Last Update */
+
+    const now = new Date();
+
+    lastUpdate.textContent =
+      "Last Update: " +
+      now.toLocaleTimeString("th-TH");
+
+  });
+
+
+  /* =========================
+     WATER LEVEL CHART
+  ========================= */
+
+  const ctx =
+    document.getElementById("waterChart");
+
+  const waterChart = new Chart(ctx, {
+
+    type: "line",
+
+    data: {
+      labels: [],
+      datasets: [{
+        label: "Water Level (cm)",
+        data: [],
+        tension: 0.35,
+        fill: true,
+        borderWidth: 3,
+        pointRadius: 3
+      }]
+    },
+
+    options: {
+
+      responsive: true,
+
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          labels: {
+            color: "#ffffff"
+          }
         }
-        from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+      },
+
+      scales: {
+
+        x: {
+          ticks: {
+            color: "#8ca4ba"
+          },
+
+          grid: {
+            color: "rgba(255,255,255,0.05)"
+          }
+        },
+
+        y: {
+
+          beginAtZero: true,
+
+          ticks: {
+            color: "#8ca4ba"
+          },
+
+          grid: {
+            color: "rgba(255,255,255,0.05)"
+          }
+        }
+
+      }
+    }
+
+  });
 
 
-        const firebaseConfig = {
+  /* =========================
+     FIREBASE HISTORY
+  ========================= */
 
-            databaseURL:
-            "https://project-55482-default-rtdb.asia-southeast1.firebasedatabase.app/"
-
-        };
-
-
-        const app = initializeApp(firebaseConfig);
-
-        const db = getDatabase(app);
+  const historyRef = query(
+    ref(db, "history"),
+    limitToLast(30)
+  );
 
 
-        const latestRef = ref(db, "latest");
+  onValue(historyRef, (snapshot) => {
+
+    const data = snapshot.val();
+
+    if (!data) return;
 
 
-        onValue(latestRef, (snapshot) => {
+    const entries = Object.values(data);
 
-            const data = snapshot.val();
+    entries.sort((a, b) => {
 
-            console.log(data);
+      return Number(a.timestamp || 0)
+           - Number(b.timestamp || 0);
 
-            if (data) {
+    });
 
-                document.getElementById("water").textContent =
-                    "ระดับน้ำ: " +
-                    data.water_level +
-                    " cm";
 
-            }
+    waterChart.data.labels = [];
 
-        });
+    waterChart.data.datasets[0].data = [];
 
-    </script>
+
+    entries.forEach(item => {
+
+      const time = item.timestamp
+        ? new Date(Number(item.timestamp))
+        : new Date();
+
+      waterChart.data.labels.push(
+        time.toLocaleTimeString("th-TH", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        })
+      );
+
+
+      waterChart.data.datasets[0].data.push(
+        Number(item.water_level || 0)
+      );
+
+    });
+
+
+    waterChart.update();
+
+  });
+
+</script>
 
 </body>
 </html>
